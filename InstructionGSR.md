@@ -11,7 +11,7 @@ The main function is the above <code>reconstruction(...)</code>.
 The following describes each controller/parameter inside this function.    
 *Additional lines might need to be added.*   
 
-## 1. Initializing:
+## 1. Initializing
 <p><strong>rootDir</strong>: set a directory where you would like to save files, such as downloaded & preprocessed data, GS reconstructed figures, etc.<br>
 e.g., <code>rootDir = '/Users/Tom_and_Jerry/'</code> </p>
 <p><strong>spacecraftID</strong>: specify the spacecraft ID, e.g., 'WIND', 'ACE', 'ULYSSES','PSP','SOLARORBITER'<br> 
@@ -37,7 +37,7 @@ In <code>reconstruction(...)</code>, set:<br>
 <code>FR_list = SFR_detection_list, eventNo=0, selectedAxis=False</code><br>
 **or**, <code>selectedAxis = True, # FR_list = SFR_detection_list, eventNo=0</code><br>
 
-## 3. Start reconstruction:
+## 3. Start reconstruction
 *Has to run twice to have the final GSR results.*<br>
 **First round**: e.g., <code>grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
 **Second round**: e.g., <code>grid_x=15, grid_y=131, get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
@@ -58,7 +58,7 @@ If satisfied with the current results, set to 1 to include other pressure terms 
 while the default settings can be used without indicating again unless one would like to adjust. <br>
 *** By this step, the GSR is completed.<br>
 
-## 4. Selective settings:
+## 4. Selective settings
 Set to be True if would like to implement additional functions<br>
 
 <strong>includeTe</strong>: include the electron temperature in the transverse pressure Pt'.<br>
