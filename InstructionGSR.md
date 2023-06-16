@@ -58,7 +58,7 @@ If satisfied with the current results, set to 1 to include other pressure terms 
 while the default settings can be used without indicating again unless one would like to adjust. <br>
 *** By this step, the GSR is completed.<br>
 
-## 4. SELECTIVE SETTINGS:
+## 4. Selective settings:
 Set to be True if would like to implement additional functions<br>
 
 <strong>includeTe</strong>: include the electron temperature in the transverse pressure Pt'.<br>
