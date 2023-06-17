@@ -1,7 +1,8 @@
 # Instruction for GS Reconstruction (GSR)
 Here is a step-by-step instruction for the Grad-Shafranov Reconstruction (GSR).<br><br> 
-<code>rootDir = '/Users/Tom_and_Jerry/'    
-reconstruction(rootDir,spacecraftID='WIND',timeStart=datetime(2005,8,28,0,23,0),timeEnd=datetime(2005,8,28,0,32,0),
+<code>SFR_detection_list = pd.read_pickle(open('/Users/Tom_and_Jerry/2001_selected_events.p','rb'))</code><br>
+*The above line is optional, see instruction below.*<br><br>
+<code>rootDir = '/Users/Tom_and_Jerry/' reconstruction(rootDir,spacecraftID='WIND',timeStart=datetime(2005,8,28,0,23,0),timeEnd=datetime(2005,8,28,0,32,0),
 FR_list=SFR_detection_list, eventNo=1, selectedAxis=False, includeTe=False, saveFig=False, plotJz=False,
 checkMVAaxis=False, plotHodogram=False, checkHT=False, plotWalenRelation=False, plotSpacecraftTimeSeries=False,
 adjustInterval=False, checkPtAFitting=False,
@@ -43,8 +44,8 @@ In <code>reconstruction(...)</code>, set:<br>
 **First round**: e.g., <code>grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
 **Second round**: e.g., <code>grid_x=15, grid_y=131, get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
 
-<strong>grid_x</strong>: default setting = 15, the grid in the x direction in FR frame.<br>
-<strong>grid_y</strong>: default setting = 131, the grid in the y direction in FR frame.<br>
+<strong>grid_x</strong>: default setting = 15, the grid in the x direction in FR frame. No need to specify if using the default setting.<br>
+<strong>grid_y</strong>: default setting = 131, the grid in the y direction in FR frame. No need to specify if using the default setting.<br>
 <strong>get_Ab</strong>: *MUST INDICATE when running*<br>
 initial setting = 0, select the boundary of A. If satisfied, set it to 1.<br>
 <strong>pressureSwitch</strong>: *MUST INDICATE when running*<br>
