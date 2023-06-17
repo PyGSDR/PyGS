@@ -7,9 +7,10 @@ checkMVAaxis=False, plotHodogram=False, checkHT=False, plotWalenRelation=False, 
 adjustInterval=False, checkPtAFitting=False,
 grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)</code><br> 
 
-The main function is the above <code>reconstruction(...)</code>.    
+The main function is the above <code>reconstruction(...)</code>, which is the only function that needs to run for GSR.    
 The following describes each controller/parameter inside this function.    
 *Additional lines might need to be added.*   
+*For non-Python users, simply copy the above lines into the Python window and press enter. Remember to change the rootDir first.
 
 ## 1. Initializing
 <p><strong>rootDir</strong>: set a directory where you would like to save files, such as downloaded & preprocessed data, GS reconstructed figures, etc.<br>
