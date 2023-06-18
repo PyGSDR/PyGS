@@ -1,9 +1,12 @@
 # Instruction for GS Reconstruction (GSR)
 Here is a step-by-step instruction for the Grad-Shafranov Reconstruction (GSR).<br><br> 
 <code>SFR_detection_list = pd.read_pickle(open('/Users/Tom_and_Jerry/2001_selected_events.p','rb'))</code><br>
-*The above line is optional, see instruction below.*<br><br>
-<code>rootDir = '/Users/Tom_and_Jerry/' reconstruction(rootDir,spacecraftID='WIND',timeStart=datetime(2005,8,28,0,23,0),timeEnd=datetime(2005,8,28,0,32,0),
-FR_list=SFR_detection_list, eventNo=1, selectedAxis=False, includeTe=False, saveFig=False, plotJz=False,
+**The above line is optional, see instruction below.*<br><br>
+<code>rootDir = '/Users/Tom_and_Jerry/' 
+reconstruction(rootDir, spacecraftID='WIND',
+FR_list=SFR_detection_list, eventNo=1, adjustAxis=True,
+timeStart=datetime(2005,8,28,0,24,0),timeEnd=datetime(2005,8,28,0,32,0),
+includeTe=False, saveFig=False, plotJz=False,
 checkMVAaxis=False, plotHodogram=False, checkHT=False, plotWalenRelation=False, plotSpacecraftTimeSeries=False,
 adjustInterval=False, checkPtAFitting=False,
 grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)</code><br> 
@@ -19,25 +22,28 @@ e.g., <code>rootDir = '/Users/Tom_and_Jerry/'</code> </p>
 <p><strong>spacecraftID</strong>: specify the spacecraft ID, e.g., 'WIND', 'ACE', 'ULYSSES','PSP','SOLARORBITER'<br> 
 e.g., <code>spacecraftID='WIND'</code></p>
 
-## 2. Select interval & obtain FR axis
-<strong>timeStart & timeEnd</strong>: designate starting and ending times of an interval.<br>
-e.g., <code>timeStart = datetime(2005,8,28,0,23,0),timeEnd=datetime(2005,8,28,0,32,0)</code><br><br>
-*No need to do so if reconstructing SFR from GS detection results.* <br>
-*For such records, only indicate the source of detection result as "FR_list" and event sequence number as "eventNo" (see below).*
-
-Flux rope axis: need to specify where the FR axis will be obtained. <br>
-<strong>FR_list & eventNo</strong>: the axis is from the detection result.    
-Thus, the event list (pickle file) has to be specified as well as the event sequence number.<br>
-<strong>selectedAxis</strong>: the axis is obtained from GSR based on the minimum residue. <br>
-*Notice that the controller "selectedAxis=True" is in conflict with FR_list & eventNo.*<br>
-
-e.g., 
+## 2. Select the interval & obtain the FR axis
+Two options to designate starting and ending times of an interval. <br>
+- If use <strong>detection</strong> results, indicate the source of detection result as "FR_list" and event sequence number as "eventNo" (see below). <br>
+e.g., test event is the first record in 2001_selected_events.p. <br>
 <code>inputListDir = 'Detection/'
 inputFileName = '2001_selected_events.p'
 SFR_detection_list = pd.read_pickle(open(rootDir + inputListDir + inputFileName,'rb'))</code><br><br>
 In <code>reconstruction(...)</code>, set:<br>
-<code>FR_list = SFR_detection_list, eventNo=0, selectedAxis=False</code><br>
-**or**, <code>selectedAxis = True, # FR_list = SFR_detection_list, eventNo=0</code><br>
+<code>FR_list = SFR_detection_list, eventNo=0 </code><br>
+**This will automatically extract timestamps for the first event from the detection result.*
+
+- If use User-selected interval, specify <strong>timeStart & timeEnd</strong><br>
+e.g., <code>timeStart = datetime(2005,8,28,0,23,0), timeEnd=datetime(2005,8,28,0,32,0)</code><br>
+**If both options exist in reconstruction, will prioritize timestamps from the detection result.*
+
+Flux rope axis: Two options to obtain the FR axis. <br>
+- If from <strong>detection</strong> results: 
+  <code>FR_list = SFR_detection_list, eventNo=0, adjustAxis=False </code><br>
+  **This will use the axis of the first event from the detection.* <br>
+  **If would like to adjust the interval while still using this axis, set adjustInterval = True.* <br>
+- If need to adjust axis from <strong>reconstruction</strong>:
+  <code>adjustAxis=True </code><br>
 
 ## 3. Start reconstruction
 *Has to run twice to have the final GSR results.*<br>
