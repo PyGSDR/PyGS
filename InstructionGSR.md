@@ -6,8 +6,8 @@ Here is a step-by-step instruction for the Grad-Shafranov Reconstruction (GSR).<
 reconstruction(rootDir, spacecraftID='WIND',
 FR_list=SFR_detection_list, eventNo=1, adjustAxis=True,
 timeStart=datetime(2005,8,28,0,24,0),timeEnd=datetime(2005,8,28,0,32,0),
-includeTe=False, saveFig=False, plotJz=False,
-checkMVAaxis=False, plotHodogram=False, checkHT=False, plotWalenRelation=False, plotSpacecraftTimeSeries=False,
+includeTe=False, includeNe=False, saveFig=False, plotJz=False,
+plotHodogram=False, checkHT=False, plotWalenRelation=False, plotSpacecraftTimeSeries=False,
 adjustInterval=False, checkPtAFitting=False,
 grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)</code><br> 
 
@@ -70,6 +70,7 @@ while the default settings can be used without indicating again unless one would
 Set to be True if would like to implement additional functions<br>
 
 <strong>includeTe</strong>: include the electron temperature in the transverse pressure Pt'.<br>
+<strong>includeNe</strong>: include the electron number density in the transverse pressure Pt'.<br>
 <strong>saveFig</strong>: save figures.<br>
 <strong>plotJz</strong>: plot the map of the axial current density jz.<br>
 <strong>plotHodogram</strong>: plot hodograms of the magnetic field via the MVAB.<br>
@@ -78,6 +79,4 @@ Set to be True if would like to implement additional functions<br>
 <strong>adjustInterval</strong>: adjust the boundary of an interval, i.e., starting and/or ending times.<br>
 *Default setting is to show the current interval with +/- 10 points.*<br>
 <strong>checkPtAFitting</strong>: check whether the extrapolation percentages (dAl0 & dAr0) are well selected.<br>
-<strong>checkMVAaxis</strong>: check Pt'(A') in MVA and minimum residue directions.<br>
-*This is only shown with selectedAxis=True.*<br>
 <strong>checkHT</strong>: check whether the current HT frame is well-found.<br>
