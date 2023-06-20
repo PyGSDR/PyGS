@@ -1,7 +1,7 @@
 #Instruction for GS detection (GSD)
 Here is a step-by-step instruction for the Grad-Shafranov-based detection. 
 
-rootDir = '/home/ychen/Desktop/PyGS/'
+<code>rootDir = '/home/ychen/Desktop/PyGS/'
 shockList = rootDir + 'IPShock_ACE_or_WIND_or_Ulysses_1996_2016_DF.p' 
 detection(rootDir,spacecraftID='PSP',
     timeStart=datetime(2018,10,31,18,0,0),
@@ -11,7 +11,7 @@ detection(rootDir,spacecraftID='PSP',
     Search=True,CombineRawResult=True,GetMoreInfo=True,
     LabelFluxRope=True,B_mag_threshold=25.0,
     shockList_DF_path=shockList,
-    allowIntvOverlap=False)
+    allowIntvOverlap=False)</code>
 
 The main function is the above detection(...), 
 which is the only function that needs to run for GSR.    
