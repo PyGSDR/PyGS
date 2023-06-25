@@ -12,6 +12,7 @@ For example, calculate VHT during **08/28/2005 08:36 - 08:49** via the **WIND** 
 import os
 import numpy as np
 import datetime
+import matplotlib.pyplot as plt
 import ReconstructionMisc as GSRM
      
 rootDir = os.getcwd() +'/test/' # directory
