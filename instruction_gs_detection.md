@@ -5,7 +5,7 @@ Here is a step-by-step instruction for the Grad-Shafranov-based detection.
 import datetime
 from FluxRopeDetection import detection
 
-rootDir = '/home/ychen/Desktop/PyGS/'
+rootDir = '/Users/Tom_and_Jerry/' 
 shockList = rootDir + 'IPShock_ACE_or_WIND_or_Ulysses_1996_2016_DF.p'
 
 detection(rootDir, spacecraftID='PSP',
