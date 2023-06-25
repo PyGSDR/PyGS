@@ -11,7 +11,7 @@ plotHodogram=False, checkHT=False, plotWalenRelation=False, plotSpacecraftTimeSe
 adjustInterval=False, checkPtAFitting=False,
 grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)</code><br> 
 
-The main function is the above <code>reconstruction(...)</code>, which is the only function that needs to run for GSR.    
+The full function is the above <code>reconstruction(...)</code>, which is the only function that needs to run for GSR.    
 The following describes each controller/parameter inside this function.    
 *Additional lines might need to be added.*   
 *For non-Python users, simply copy the above lines into the Python window and press enter. Remember to change the rootDir first.
@@ -49,6 +49,8 @@ Flux rope axis: Two options to obtain the FR axis. <br>
 *Has to run twice to have the final GSR results.*<br>
 **First round**: e.g., <code>grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
 **Second round**: e.g., <code>grid_x=15, grid_y=131, get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
+**or** <code>grid_x=15, grid_y=131, get_Ab=-1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0</code><br>
+**The sign of get_Ab depends on flux rope chirality. Right/left-handed corresponds to +/- 1.*
 
 <strong>grid_x</strong>: default setting = 15, the grid in the x direction in FR frame. No need to specify if using the default setting.<br>
 <strong>grid_y</strong>: default setting = 131, the grid in the y direction in FR frame. No need to specify if using the default setting.<br>
@@ -66,7 +68,7 @@ If satisfied with the current results, set to 1 to include other pressure terms 
 while the default settings can be used without indicating again unless one would like to adjust. <br>
 *** By this step, the GSR is completed.<br>
 
-## 4. Selective settings
+## 4. Selective settings and Add-on features
 Set to be True if would like to implement additional functions<br>
 
 <strong>includeTe</strong>: include the electron temperature in the transverse pressure Pt'.<br>
