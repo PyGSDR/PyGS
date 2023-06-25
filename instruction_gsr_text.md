@@ -18,7 +18,7 @@ reconstruction(rootDir, spacecraftID='WIND',
                timeStart=datetime(2005,8,28,0,24,0), timeEnd=datetime(2005,8,28,0,32,0), 
                includeTe=False, includeNe=False, saveFig=False, 
                plotJz=False, plotHodogram=False, checkHT=False, plotWalenRelation=False, 
-               plotSpacecraftTimeSeries=False, adjustInterval=False, checkPtAFitting=False, helictyTwist=False,
+               plotSpacecraftTimeSeries=False, adjustInterval=False, checkPtAFitting=False, helicityTwist=False,
                grid_x=15, grid_y=131, get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)
 ```
 
@@ -97,5 +97,5 @@ Set to be True if would like to implement additional functions.
 **adjustInterval**: adjust the boundary of an interval, i.e., starting and/or ending times.    
 *Default setting is to show the current interval with +/- 10 points.*    
 **checkPtAFitting**: check whether the extrapolation percentages (dAl0 & dAr0) are well selected.    
-**helictyTwist**: estimate the relative helicity and average twist.     
+**helicityTwist**: estimate the relative helicity and average twist.     
 **checkHT**: check whether the current HT frame is well-found.    
