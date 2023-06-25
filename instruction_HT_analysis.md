@@ -68,7 +68,3 @@ On your terminal:
  [-0.46189849  0.19144135  0.8660254 ]]    
 
 **The first to third columns represent X_UnitVector, Y_UnitVector, and Z_UnitVector respectively.*
-
-Figure: Hodograms of the magnetic field.    
-**Subscripts 1, 2, and 3 correspond to the maximum, intermediate, and minimum variance in the magnetic field.*   
-<img width="600" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/test_mvab.png">
