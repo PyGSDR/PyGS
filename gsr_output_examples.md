@@ -54,6 +54,7 @@ Outputs:
 > Figure 1: Four pressures versus A'.    
 > Since the first round has ```pressureSwitch = 0```, the thermal pressure (3rd panel) was 0.    
 > Now, all pressures are included.
+> 
 > <img width="600" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_4_pressures.png">   
 
 > Figures 2 & 3: The reconstructed cross-sectional map & Pt' versus A'.    
