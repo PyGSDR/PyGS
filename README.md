@@ -27,11 +27,11 @@ For the GSR, please see [instruction_gsr_example](https://github.com/PyGSDR/PyGS
 
 ## Python & Dependencies
 - Python 3.8 and later
-- numpy
+- NumPy
 - ai.cdas
-- scipy
+- SciPy
 - pandas
-- matplotlib
+- Matplotlib
 
 ## Installations
 TBC...
