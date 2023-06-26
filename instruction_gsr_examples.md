@@ -102,7 +102,8 @@ and how to select the flux rope axis via the reconstruction.
 ### 2.2 From reconstruction 
 - Keep those lines above the main function ```reconstruction(...)```.    
 - Turn on ```adjustAxis``` in ```reconstruction(...)```.
-- First, we would like to use timestamps of detection event No.53 while getting a new axis.      
+- Here, we would like to use timestamps of detection event No.53 while getting a new axis.
+  - Can also proceed with User-specified time intervals 
 
 ```python
 import pickle
@@ -122,7 +123,24 @@ reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo
                get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                adjustAxis=True)
 ``` 
+- Outputs:
+  - The residue map
+    > The big black dot represents the axis with the minimum residue.    
+    > Users select any point within the contour.    
+    > The cross and number represent the sequence of the current trial, i.e., how many clicks by far.    
+    > The next three figures pop up, and with them, users will determine whether this is a good axis.    
+    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_residue_map.png">
+  - Pt'(A') in different axial directions: MVA, minimum residue, and user-selected.    
+    > Figure shows two branches of Pt'(A') in different directions (see legends).    
+    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_multi_directions.png">
+  - Parameters along the spacecraft path: A', B in flux rope frame, pressures, and plasma beta.
+    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_parameters_alongsc.png">
+  - Four pressures versus A'.
+    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_4_pressures.png">
 
+- Contingency
+   > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_temporary.png">
+    
 ## 3.1 Round 1 for reconstruction
 Durinng two rounds in Sections 3.1 & 3.2, we will mainly adjust the 5th & 6th rows in ```reconstruction(...)```.
 - Explanation of parameters in these two rows:
