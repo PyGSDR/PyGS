@@ -124,7 +124,8 @@ reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo
 ``` 
 
 ## 3.1 Round 1 for reconstruction
-- Explanation of the 5th & 6th lines in ```reconstruction(...)```:
+Durinng two rounds in Sections 3.1 & 3.2, we will mainly adjust the 5th & 6th rows in ```reconstruction(...)```.
+- Explanation of parameters in these two rows:
   - **grid_x**: No need to specify if using the default setting
     - default setting = 15, the grid in the x direction in FR frame. 
   - **grid_y**: No need to specify if using the default setting
@@ -142,12 +143,14 @@ reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo
     - adjust to any numbers in [0,1] to change the right boundary/percentage of extrapolation.
 
 - Round 1: runs with initial settings
+  - Here we only present results with the axis from the detection.
+  - Those with the axis from reconstruction will follow the same procedure. 
   - Since lines above the main function ```reconstruction(...)``` remain the same, we will focus on changes in controllers within
 ```reconstruction(...)```. Correspondingly, the code example will only display for ```reconstruction(...)```. 
 For non-Python users, remember to copy all those lines before this function when running.
 
     ```python
-
+    # Using default grids, thus no need to specify grid_x or grid_y.
     reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
                    get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)
     ```    
@@ -159,24 +162,30 @@ For non-Python users, remember to copy all those lines before this function when
       > Take the second panel as the main reference.
       > If it does not have a cross point, try the first panel.
       > The reconstruction is then processed and Figures 2 & 3 will pop up.    
-      > <img width="600" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_pressures.png">   
+      > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_pressures.png">   
 
       > **Figures 2 & 3**: The reconstructed cross-sectional map & Pt' versus A'.    
       > These two figures are temporary results obtained from the GSR (not the final yet).         
-      > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_cross_section.png">
-      > <img width="270" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_PtA.png">
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_cross_section.png">
+      > <img width="220" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_PtA.png">
 
   - Can also change ```dmid```, ```dAl0```, and ```dAr0``` if necessary.
     - ```dmid = 0```: set the spacecraft path at 0.
     -  ```dAl0``` and ```dAr0```: Usually can turn on ```checkPtAFitting``` to see whether they need changes.
-         ```python
+
+       ```python
         reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
                    get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    checkPtAFitting=True)
         ```
-      > These two figures show the normalized curves during the first (left) and second (right) round.    
-      > <img width="250"        src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_check_PtA.png">
-
+    - Outputs:
+      > Figure shows the normalized Pt'(A') and fitting curves.    
+      > Since the left and right boundaries look good. We decide to keep ```dAl0=0.0, dAr0=0.0```.     
+      > <img width="250"        src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_check_PtA.png">    
+    - Can be adjusted multiple times until satisfied.
+      - For **non-Python users**, you will manually close or quit all figures to rerun the above command line.
+      - If satisfied with the current results, go to Section 4.
+      
 ## 4. Round 2 for reconstruction
 ```python
 reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
@@ -192,40 +201,42 @@ reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=
     > Since the first round has ```pressureSwitch = 0```, the thermal pressure (3rd panel) was 0.    
     > Now, all pressures are included.
     > 
-    > <img width="600" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_4_pressures.png">   
+    > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_4_pressures.png">   
 
     > Figures 2 & 3: The reconstructed cross-sectional map & Pt' versus A'.    
     > These two figures are the **final** results from the GSR.    
     > Left: the black contours and color background represent the transverse Bt and the axial ﬁeld Bz.
     > The closed transverse ﬁeld-line regions and the gradient of the unipolar Bz confirm the ﬂux rope conﬁguration.
     > More info about these figures can be found in any reference papers related to the GSR technique.   
-    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section.png">
-    > <img width="270" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_PtA.png">
+    > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section.png">
+    > <img width="220" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_PtA.png">
 
 
-- Additional changes can be made on ```dmid```, ```dAl0```, and ```dAr0``` if necessary.    
+- Again, check whether ```dmid```, ```dAl0```, and ```dAr0``` needs adjustments.  
   - ```dmid = -10```
-    - This change will move the spacecraft upward.    
-      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png">
+    - Now, we would like to move the spacecraft path upward.
+      > Comparison between before (left) and after moving (right):    
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section.png">
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png">        
   - ```dAl0 = 0.0, dAr0 = 0.0```
-    - These two parameters control the percentages of extrapolation at left and right boundaries.
-    - Usually can turn on ```checkPtAFitting``` to see whether they need changes.    
-    - 
-    - ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
-                   get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
-                   checkPtAFitting=True,)
-        ```
-    - Outputs:
-      > These two figures show the normalized curves.    
-      > Since the left and right boundaries look good. We decide to keep ```dAl0=0.0, dAr0=0.0```.
-      > <img width="250"        src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_check_PtA.png">
-      > <img width="250"         src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_check_PtA.png">
+    - Outputs:    
+      > Figure shows the normalized curves.    
+      > So, still feel good, and thus no changes.     
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_check_PtA.png">
+
+- Since we are okay with the current results, the GSR for this event is complete by this step.
+  - If unsatisfied, re-run the main function and adjust the above parameters.
 
 ## 5. Add-on features (recommend turning on after Round 2)
-- **saveFig**: save figures.   
+The following are add-on features, which are independent and optional.     
+The default setting is False, i.e., they will not be implemented.    
+Change to True if would like to have any features.    
+
+- **saveFig**: save figures.
+   
 - **plotJz**: plot the map of the axial current density jz.
     - In ```reconstruction(...)```, add ```plotJz = True```.    
+
         ```python
         reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
@@ -240,7 +251,9 @@ reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotHodogram=True)
         ```
-        > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_hodogram.png">  
+        > Subscripts 1, 2, and 3 correspond to the maximum, intermediate, and minimum variance in the magnetic field.    
+        > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_hodogram.png">
+        
 - **plotWalenRelation**: plot the Walen relation between V-remaining and VA.
     - In ```reconstruction(...)```, add ```plotWalenRelation = True```.    
         ```python
@@ -248,6 +261,8 @@ reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotWalenRelation=True)
         ```
+        > The Walen relation between the remaining flow and Alfven velocities.    
+        > Red, green, and blue circles represent components (R, T, N) or (X, Y, Z).    
         > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_walen_relation.png">  
 
 - **plotSpacecraftTimeSeries**: plot the time-series data from spacecraft.
@@ -257,58 +272,55 @@ reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotSpacecraftTimeSeries=True)
         ```
-        > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_spacecraftTimeSeries.png">  
+       > Time series plot from the original spacecraft dataset.    
+       > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_spacecraftTimeSeries.png">  
         
 - **adjustInterval**: adjust the boundary of an interval, i.e., starting and/or ending times.    
-    - *Default setting is to show the current interval with +/- 10 points.*    
+    - The default setting is to show the current interval with +/- 10 points.
+    - Needs to add during the first round. The second round will load a saved boundary file directly.    
+    - In ```reconstruction(...)```, add ```adjustInterval = True```.    
 
-- **checkPtAFitting**: shown above.
+       ```python
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+                   get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
+                   adjustInterval=True)
+        ```
+       > Time series plot with the new interval marked by two vertical dashed lines.    
+       > They are adjusted based on the resolution of processed data.    
+       >
+       > On Terminal, it shows:    
+       > Selected starting time   =  2018-08-24 11:34:28    
+       > Selected ending time     =  2018-08-24 16:58:25    
+       > Adjusted starting time   =  2018-08-24 11:34:00    
+       > Adjusted ending time     =  2018-08-24 16:58:00    
+       > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_adjustInterval.png">
+       
+- **checkPtAFitting**: as shown in the previous section.
      
-- **helicityTwist**: estimate the relative helicity and average twist.     
+- **helicityTwist**: estimate the relative helicity and average twist (shown on terminal).
+    
 - **checkHT**: check whether the current HT frame is well-found.
      - In ```reconstruction(...)```, add ```checkHT = True```.    
+
         ```python
         reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    checkHT=True)
         ```
+        > Comparison between -VHT x B and -VHT(t) x B.    
         > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_checkHT.png">  
         
 - **includeTe**: include the electron temperature in the transverse pressure Pt'.
+  
 - **includeNe**: include the electron number density in the transverse pressure Pt'.
+  
 - **Other Calculations and derived parameters** of a flux rope: mostly shown on the terminal.    
       - Parameters for the Grad-Shafranov reconstruction, e.g., the aforementioned second line    
       - Figure information      
-      - The maximum of the axial magnetic field Bz   = 7.403238594695631 nT      
-      - The maximum of the axial current density jz  = 3.241255038840692e-12 A/m^2    
-      - Estimated toroidal magnetic flux             = 180038399696.94977 Wb    
-      - Estimated poloidal magnetic flux at 1 AU     = 1152801302589.8374 Wb    
-      - Estimated relative helicity                  = 0.00031948627788541526 nT^2/AU^2    
-      - Estimated relative helicity per unit length  = 0.00046711112871995975 nT^2/AU^3    
-      - Estimated average twist                      = 9.85648174146297e-27   
-
-
----
-
-## Using the flux rope axis from the detection result
-### Round 1
-**Have to start over with the initial settings.*
-
-```python
-import pickle
-import pandas as pd
-import datetime
-from ReconstructionMisc import reconstruction
-
-rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
-inputFileName = 'events/2018_selected_events.p' # specify input file's name
-# load flux rope list from detection result
-SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
-
-# In reconstruction (...), specify spacecraft ID, FR_list, and eventNo.
-# The second line shows the initial settings of the GSR.
-# To obtain an axis from GSR, set **adjustAxis=True**
-reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
-               get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
-               adjustAxis=True)
-```
+      - The maximum of the axial magnetic field **Bz**   = 7.403238594695631 nT      
+      - The maximum of the axial current density **jz**  = 3.241255038840692e-12 A/m^2    
+      - Estimated **toroidal magnetic flux**             = 180038399696.94977 Wb    
+      - Estimated **poloidal magnetic flux** at 1 AU     = 1152801302589.8374 Wb    
+      - Estimated **relative helicity**                  = 0.00031948627788541526 nT^2/AU^2    
+      - Estimated **relative helicity per unit length**  = 0.00046711112871995975 nT^2/AU^3    
+      - Estimated **average twist**                      = 9.85648174146297e-27   
