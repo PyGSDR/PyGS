@@ -102,45 +102,61 @@ and how to select the flux rope axis via the reconstruction.
 ### 2.2 From reconstruction 
 - Keep those lines above the main function ```reconstruction(...)```.    
 - Turn on ```adjustAxis``` in ```reconstruction(...)```.
-- Here, we would like to use timestamps of detection event No.53 while getting a new axis.
-  - Can also proceed with User-specified time intervals 
+- Here, we would like to use timestamps of detection event No.53 while getting a new axis. 
 
-```python
-import pickle
-import pandas as pd
-import datetime
-from ReconstructionMisc import reconstruction
+  ```python
+  import pickle
+  import pandas as pd
+  import datetime
+  from ReconstructionMisc import reconstruction
 
-rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
-inputFileName = 'events/2018_selected_events.p' # specify input file's name
-# load flux rope list from detection result
-SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
+  rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
+  inputFileName = 'events/2018_selected_events.p' # specify input file's name
+  # load flux rope list from detection result
+  SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
 
-# In reconstruction (...), specify spacecraft ID, FR_list, and eventNo.
-# The second line shows the initial settings of the GSR. MUST INCLUDE THE FIRST TWO
-# The default setting of adjustAxis is False if not specified.
-reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
-               get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
-               adjustAxis=True)
-``` 
+  # In reconstruction (...), specify spacecraft ID, FR_list, and eventNo.
+  # The second line shows the initial settings of the GSR. MUST INCLUDE THE FIRST TWO
+  # The default setting of adjustAxis is False if not specified.
+  reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+                 get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
+                 adjustAxis=True)
+  ``` 
 - Outputs:
-  - The residue map
-    > The big black dot represents the axis with the minimum residue.    
+  - Left: The residue map & Right: Pt'(A') in different axial directions:
+    > Left: The big black dot represents the axis with the minimum residue.    
     > Users select any point within the contour.    
     > The cross and number represent the sequence of the current trial, i.e., how many clicks by far.    
-    > The next three figures pop up, and with them, users will determine whether this is a good axis.    
+    > The next three figures pop up, and with them, users will determine whether this is a good axis.
+    > The right Figure shows two branches of Pt'(A') in different directions (see legends).    
     > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_residue_map.png">
-  - Pt'(A') in different axial directions: MVA, minimum residue, and user-selected.    
-    > Figure shows two branches of Pt'(A') in different directions (see legends).    
     > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_multi_directions.png">
   - Parameters along the spacecraft path: A', B in flux rope frame, pressures, and plasma beta.
-    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_parameters_alongsc.png">
+    > Figure shows several parameters along the spacecraft path with the selected axial direction.    
+    > For a flux rope structure, A' has one and only one extremum, and B_inFR has one or more rotating components.    
+    > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_parameters_alongsc.png">
   - Four pressures versus A'.
-    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_4_pressures.png">
-
-- Contingency
-   > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_temporary.png">
+    > Panels show Pt'(A'), Bz'(A'), p'(A'), and PBz'(A').    
+    > For a flux rope, it must have a good double-folding pattern between two branches of Pt'(A') or Bz'(A').    
+    > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_4_pressures.png">
     
+- On the terminal, it will ask you to answer "y" or "n" to **Is the optimal invariance direction found**?
+  - If "n", figures will be closed automatically except for the residue map.
+    - On the residue map, click on an alternative point.
+    - The rest three figures will show up and let you decide again.
+    - There will be 5 trials for each run, i.e., you can answer "n" five times.
+    - The temporary residue map will be saved if the 5th result is still unsatisfied.
+  - If "y", all figures will be closed automatically and Figure 1 in Section 3.1 will appear (see below).
+    - Now, it means you are ready for getting reconstruction results.
+
+- More information will be printed on the terminal:
+  - Trial number
+  - Three components of the minimum residue axis and selected axis.
+  - Instruction on how to select an axis.
+  - Figure information
+
+- The above procedure also proceeds with User-specified time intervals
+  
 ## 3.1 Round 1 for reconstruction
 Durinng two rounds in Sections 3.1 & 3.2, we will mainly adjust the 5th & 6th rows in ```reconstruction(...)```.
 - Explanation of parameters in these two rows:
@@ -270,7 +286,7 @@ Change to True if would like to have any features.
                    plotHodogram=True)
         ```
         > Subscripts 1, 2, and 3 correspond to the maximum, intermediate, and minimum variance in the magnetic field.    
-        > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_hodogram.png">
+        > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_hodogram.png">
         
 - **plotWalenRelation**: plot the Walen relation between V-remaining and VA.
     - In ```reconstruction(...)```, add ```plotWalenRelation = True```.    
@@ -291,7 +307,7 @@ Change to True if would like to have any features.
                    plotSpacecraftTimeSeries=True)
         ```
        > Time series plot from the original spacecraft dataset.    
-       > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_spacecraftTimeSeries.png">  
+       > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_spacecraftTimeSeries.png">  
         
 - **adjustInterval**: adjust the boundary of an interval, i.e., starting and/or ending times.    
     - The default setting is to show the current interval with +/- 10 points.
@@ -311,7 +327,7 @@ Change to True if would like to have any features.
        > Selected ending time     =  2018-08-24 16:58:25    
        > Adjusted starting time   =  2018-08-24 11:34:00    
        > Adjusted ending time     =  2018-08-24 16:58:00    
-       > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_adjustInterval.png">
+       > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_adjustInterval.png">
        
 - **checkPtAFitting**: as shown in the previous section.
      
