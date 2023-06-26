@@ -157,7 +157,7 @@ and how to select the flux rope axis via the reconstruction.
 
 - The above procedure also proceeds with User-specified time intervals
   
-## 3 Round 1 for reconstruction
+## 3. Round 1 for reconstruction
 Durinng two rounds in Sections 3.1 & 3.2, we will mainly adjust the 5th & 6th rows in ```reconstruction(...)```.
 - Explanation of parameters in these two rows:
   - **grid_x**: No need to specify if using the default setting
