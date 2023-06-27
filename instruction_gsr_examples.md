@@ -86,7 +86,7 @@ E.g., ```spacecraftID='WIND'```
 
     ```
   - **Attention**:
-    - If both options are specified, e.g., ```FR_list=SFR_detection_list, eventNo=53, timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0)```,
+    - If both options are specified, i.e., ```FR_list=SFR_detection_list, eventNo=53, timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0)```,
     - Will prioritize timestamps from the detection result.
   
 ## 2. Obtaining the flux rope axis  
@@ -315,7 +315,7 @@ Change to True if would like to have any features.
 
        ```python
         reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
-                   get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
+                   get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    adjustInterval=True)
         ```
        > Time series plot with the new interval marked by two vertical dashed lines.    
@@ -348,7 +348,7 @@ Change to True if would like to have any features.
 - **includeNe**: include the electron number density in the transverse pressure Pt'.
   
 - **Other Calculations and derived parameters** of a flux rope: mostly shown on the terminal.    
-      - Parameters for the Grad-Shafranov reconstruction, e.g., the aforementioned second line    
+      - Parameters for the Grad-Shafranov reconstruction, i.e., the aforementioned 6th row     
       - Figure information      
       - The maximum of the axial magnetic field **Bz**   = 7.403238594695631 nT      
       - The maximum of the axial current density **jz**  = 3.241255038840692e-12 A/m^2    
