@@ -95,7 +95,7 @@ In this section, we will introduce how to proceed the reconstruction with the de
 ### 2.1 From the detection result
 - Skip the rest of Section 2. Go to Section 3.
   - Since we use the detection result, the flux rope axis will also be extracted automatically.
-  - Actually, we already start the reconstruction by copying the code block in Section 1.
+  - Actually, the reconstruction is already started by copying the code block in Section 1.
 - If specifying timestamps manually in the last step, go to Section 2.2 to obtain a new axis.
 
 ### 2.2 From reconstruction 
