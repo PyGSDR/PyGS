@@ -101,7 +101,9 @@ In this section, we will introduce how to proceed the reconstruction with the de
 ### 2.2 From reconstruction 
 - Keep those lines above the main function ```reconstruction(...)```.    
 - Turn on ```adjustAxis``` in ```reconstruction(...)```.
-- Here, we would like to use timestamps of detection event No.53 while getting a new axis. 
+- Here, we would like to use timestamps of detection event No.53 while getting a new axis.
+- It will pop up four figures to let you decide whether this is a good axis.
+- Provide an answer on the terminal to proceed (see detailed info below).
 
   ```python
   import pickle
@@ -126,8 +128,9 @@ In this section, we will introduce how to proceed the reconstruction with the de
     > Left: The big black dot represents the axis with the minimum residue.    
     > Users select any point within the contour.    
     > The cross and number represent the sequence of the current trial, i.e., how many clicks by far.    
-    > The next three figures pop up, and with them, users will determine whether this is a good axis.
+    > The next three figures pop up, and with them, users will determine whether this is a good axis.    
     > The right Figure shows two branches of Pt'(A') in different directions (see legends).    
+    > **If it appears blank, it means the current selection is not acceptable. Try a different one.*    
     > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_residue_map.png">
     > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_multi_directions.png">
   - Parameters along the spacecraft path: A', B in flux rope frame, pressures, and plasma beta.
