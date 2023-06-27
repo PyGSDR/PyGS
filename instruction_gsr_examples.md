@@ -90,8 +90,7 @@ E.g., ```spacecraftID='WIND'```
     - Will prioritize timestamps from the detection result.
   
 ## 2. Obtaining the flux rope axis  
-In this section, we will introduce how to proceed with the reconstruction with the detection result   
-and how to select the flux rope axis via the reconstruction.
+In this section, we will introduce how to proceed the reconstruction with the detection result and how to select the flux rope axis via the reconstruction.
 
 ### 2.1 From the detection result
 - Skip the rest of Section 2. Go to Section 3.
