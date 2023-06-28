@@ -1,6 +1,6 @@
 # Instruction for GS detection (GSD)    
 Here is a step-by-step instruction for the Grad-Shafranov-based detection. 
-## Main command line
+## Main Function
 ```python
 import datetime
 from PyGS.FluxRopeDetection import detection
