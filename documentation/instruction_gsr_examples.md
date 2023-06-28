@@ -90,8 +90,7 @@ Initialization includes all lines before the main function ```reconstruction(...
 
     ```
   - **Attention**:
-    - If both options are included, i.e., ```FR_list=SFR_detection_list, eventNo=0, timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0)```,
-    - Will prioritize timestamps from the detection result and neglect ```timeStart and timeEnd```.
+    - If both options are included, i.e., ```FR_list=SFR_detection_list, eventNo=0, timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0)```, will prioritize timestamps from the detection result and neglect ```timeStart and timeEnd```.
   
 ## 2. Obtaining the flux rope axis  
 In this section, we will introduce how to proceed the reconstruction with the detection result and how to select the flux rope axis via the reconstruction.
