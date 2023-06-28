@@ -50,7 +50,6 @@ import matplotlib.pyplot as plt
 from PyGS import ReconstructionMisc as GSRM
 
 rootDir = '/home/ychen/Desktop/PyGS/examples/' # directory to where you examples folder
-
 timeStart=datetime.datetime(2018,8,24,11,29,0) # starting   
 timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending    
 z_axis = np.array([0.15038373318,-0.852868531952,-0.5]) # given a direction    
@@ -63,7 +62,6 @@ HT_frame = GSRM.clouddata(timeStart, timeEnd, alldata, func='HT_frame',
                           fluxropeAxis=z_axis, spacecraftID='WIND')
 print(HT_frame)
 
-plt.show()
 ```
 On your terminal:   
 > [[ 0.9885453   0.01276428  0.15038373]    
