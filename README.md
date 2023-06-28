@@ -41,7 +41,7 @@ import PyGS
   - Please see [instruction_gsd](https://github.com/PyGSDR/PyGS/blob/main/instruction_gsd.md) for more information.
   ```python
   import datetime
-  from FluxRopeDetection import detection
+  from PyGS.FluxRopeDetection import detection
   rootDir = '/home/ychen/Desktop/PyGS/examples/'
   # Notice the shock list file is needed.
   # Please make sure if you have specified the correct path to this file.
@@ -62,15 +62,15 @@ import PyGS
   import pickle
   import pandas as pd
   from datetime import datetime
-  from ReconstructionMisc import MVAB
-  from ReconstructionMisc import reconstruction
+  from PyGS.ReconstructionMisc import MVAB
+  from PyGS.ReconstructionMisc import reconstruction
 
   # Please specify the path to where the "examples" folder is saved.
   # Parameter settings here need extra files in the "examples" folder.
   # You may follow the instruction to start over with the initial settings.
 
   rootDir = '/home/ychen/Desktop/PyGS/examples/'
-  inputFileName = '/selected_event.p'
+  inputFileName = '/selected_event.p' # The file includes the flux rope parameters
   
   SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb'))
   reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=1,
@@ -85,17 +85,18 @@ import PyGS
 
   ```
 
-- The GSR function includes some calculations, e.g., HT frame analysis, MVAB, etc. Users can also run these functions independently.
-- For HT analysis, please see [instruction_HT_analysis](https://github.com/PyGSDR/PyGS/blob/main/instruction_HT_analysis.md).
-- For MVAB frame, please see [instruction_mvab](https://github.com/PyGSDR/PyGS/blob/main/instruction_mvab.md).
+- The GSR function includes some calculations, e.g., HT frame analysis, MVAB, etc,. which can be run independently.
+  - For HT analysis, please see [instruction_HT_analysis](https://github.com/PyGSDR/PyGS/blob/main/instruction_HT_analysis.md).
+  - For MVAB frame, please see [instruction_mvab](https://github.com/PyGSDR/PyGS/blob/main/instruction_mvab.md).
 
 ## Citations and References
 - If using GSD, please cite [Hu et al. 2018](https://doi.org/10.3847/1538-4365/aae57d) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).    
 - If using GSR, please cite [Hu & Sonnuerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293) & & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).
 - Flux rope events using the original GSD are available on [flux rope database](http://www.fluxrope.info).
+- Python files for the original GSD are available on [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection).
 
 ## Acknowledgements
-We thank the help and previous work of Dr. Jinlei Zheng who created the original GSD. We acknowledge the funding NASA 80NSSC23K0256.
+We thank the help and previous work of Dr. Jinlei Zheng who created the original GSD, and acknowledge the NASA 80NSSC23K0256 for funding.
 
 ## Notes
 @Jun 27, 2023: This is a beta version. 
