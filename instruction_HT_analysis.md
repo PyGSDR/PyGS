@@ -13,7 +13,7 @@ import os
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-import ReconstructionMisc as GSRM
+from PyGS import ReconstructionMisc as GSRM
      
 rootDir = os.getcwd() +'/test/' # directory to where you save test folder
 timeStart=datetime.datetime(2018,8,24,11,29,0) # starting
@@ -47,7 +47,7 @@ import os
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-import ReconstructionMisc as GSRM
+from PyGS import ReconstructionMisc as GSRM
 
 timeStart=datetime.datetime(2018,8,24,11,29,0) # starting   
 timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending    
