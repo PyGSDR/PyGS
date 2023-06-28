@@ -23,7 +23,7 @@ timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending
 alldata, longer_data_interval = GSRM.download_process_data(timeStart, timeEnd, file_dir=rootDir,
                                                            spacecraftID='WIND', func='simple_VHT') 
 # Calculate VHT
-VHT = gsmisc.findVHT(alldata,spacecraftID='WIND',func='simple_VHT',checkHT=True)
+VHT = GSRM.findVHT(alldata,spacecraftID='WIND',func='simple_VHT',checkHT=True)
 print("VHT is =", VHT)
 
 plt.show()
