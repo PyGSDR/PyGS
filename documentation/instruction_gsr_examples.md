@@ -358,7 +358,7 @@ Change to True if would like to have any features.
       - Parameters for the Grad-Shafranov reconstruction, i.e., the aforementioned 6th row     
       - Figure information      
       - The maximum of the axial magnetic field **Bz**   = 7.403238594695631 nT      
-      - The maximum of the axial current density **jz**  = 3.241255038840692e-12 A/m^2
+      - The maximum of the axial current density **jz**  = 3.241255038840692e-12 A/m^2    
       - Estimated axial current                          = 64515916.57123131 A    
       - Estimated **toroidal magnetic flux**             = 179317855413.55267 Wb    
       - Estimated **poloidal magnetic flux** at 1 AU     = 1144618485766.9966 Wb    
