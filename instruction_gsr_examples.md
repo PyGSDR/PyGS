@@ -52,7 +52,7 @@ E.g., ```spacecraftID='WIND'```
     import pickle
     import pandas as pd
     import datetime
-    from ReconstructionMisc import reconstruction
+    from PyGS.ReconstructionMisc import reconstruction
 
     rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
     inputFileName = 'events/2018_selected_events.p' # specify input file's name
@@ -74,7 +74,7 @@ E.g., ```spacecraftID='WIND'```
     import pickle
     import pandas as pd
     import datetime
-    from ReconstructionMisc import reconstruction
+    from PyGS.ReconstructionMisc import reconstruction
 
     rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
     
@@ -109,7 +109,7 @@ In this section, we will introduce how to proceed the reconstruction with the de
   import pickle
   import pandas as pd
   import datetime
-  from ReconstructionMisc import reconstruction
+  from PyGS.ReconstructionMisc import reconstruction
 
   rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
   inputFileName = 'events/2018_selected_events.p' # specify input file's name
