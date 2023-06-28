@@ -44,9 +44,10 @@ Initialization includes all lines before the main function ```reconstruction(...
 - **spacecraftID**: specify the spacecraft ID, e.g., 'WIND', 'ACE', 'ULYSSES', 'PSP', 'SOLARORBITER'.    
   - E.g., ```spacecraftID='WIND'```
 - **Flux rope timestamps**: can be either from detection or user-specified
-  - If **detection**: here we use a record 08/24/2018 11:29:00 - 17:10:00 UT via the WIND spacecraft.
+  - If **detection**: 
     - Specify the source of event list from the detection, i.e., ```inputFileName```
-    - It is the first event in the detection file selected_events.p, i.e., ```eventNo = 0```
+    - Here we use a record 08/24/2018 11:29:00 - 17:10:00 UT via the WIND spacecraft.    
+      - It is the first event in the detection file selected_events.p, i.e., ```eventNo = 0```
     - The starting and ending times will be extracted automatically.
     - No need to indicate timestamps in ```reconstruction(...)```.    
     <br>
