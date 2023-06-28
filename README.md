@@ -24,7 +24,7 @@ Python 3 | Numpy | SciPy | pandas | Matplotlib | ai.cdas | SpacePy
 For non-Python users*:
 ```shell
 # Download PyGS & find where the file is, usually in downloads folder
-
+# Also download "examples" folder since it includes necessary inputs for testing.
 # On your terminal:
 tar -zxvf PyGS-0.0.1.tar.gz
 cd PyGS-0.0.1
