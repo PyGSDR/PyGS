@@ -102,4 +102,6 @@ import PyGS
 We thank the help and previous work of Dr. Jinlei Zheng who created the original GSD, and acknowledge the NASA 80NSSC23K0256 for funding.
 
 ## Notes
-@Jun 27, 2023: This is a beta version. 
+@Jun 27, 2023: 
+This is a beta version.     
+Please reach out to Dr. Yu Chen (yc0020@uah.edu) for any bugs.
