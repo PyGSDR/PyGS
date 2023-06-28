@@ -30,7 +30,6 @@ from matplotlib.lines import Line2D
 import matplotlib.dates as mdates
 import matplotlib.cbook as cbook
 from PIL import Image
-import torch
 
 import warnings
 warnings.filterwarnings(action="ignore")
