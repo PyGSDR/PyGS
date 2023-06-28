@@ -46,6 +46,7 @@ import PyGS
   ```python
   import datetime
   from PyGS.FluxRopeDetection import detection
+  
   rootDir = '/home/ychen/Desktop/PyGS/examples/'
   # Notice the shock list file is needed.
   # Please make sure if you have specified the correct path to this file.
@@ -65,7 +66,6 @@ import PyGS
   import pickle
   import pandas as pd
   import datetime
-  from PyGS.ReconstructionMisc import MVAB
   from PyGS.ReconstructionMisc import reconstruction
 
   # Please specify the path to where the "examples" folder is saved.
