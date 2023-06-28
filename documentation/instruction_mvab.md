@@ -8,6 +8,8 @@ import datetime
 import matplotlib.pyplot as plt
 from PyGS import ReconstructionMisc as GSRM
 
+rootDir = '/home/ychen/Desktop/PyGS/examples/'
+
 timeStart=datetime.datetime(2018,8,24,11,29,0) # starting    
 timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending    
 
