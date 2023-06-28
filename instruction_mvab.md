@@ -12,7 +12,7 @@ timeStart=datetime.datetime(2018,8,24,11,29,0) # starting
 timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending    
 
 # download and process the data file
-alldata, longer_data_interval = gsmisc.download_process_data(timeStart, timeEnd,
+alldata, longer_data_interval = GSRM.download_process_data(timeStart, timeEnd,
                                                              file_dir=rootDir, spacecraftID='WIND')    
 # Get the magnetic field data from processed file                                                         
 B_DataFrame = GSRM.clouddata(timeStart,timeEnd,alldata,func='mvab',spacecraftID='WIND')    
