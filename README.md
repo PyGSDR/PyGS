@@ -62,10 +62,9 @@ import PyGS
 - The Grad-Shafranov (GS)-based reconstruction (GSR)
   - Please see [instruction_gsr_example](https://github.com/PyGSDR/PyGS/blob/main/instruction_gsr_examples.md) for more information.
   ```python
-  from __future__ import division
   import pickle
   import pandas as pd
-  from datetime import datetime
+  import datetime
   from PyGS.ReconstructionMisc import MVAB
   from PyGS.ReconstructionMisc import reconstruction
 
