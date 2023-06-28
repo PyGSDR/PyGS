@@ -15,10 +15,10 @@ timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending
 alldata, longer_data_interval = gsmisc.download_process_data(timeStart, timeEnd,
                                                              file_dir=rootDir, spacecraftID='WIND')    
 # Get the magnetic field data from processed file                                                         
-B_DataFrame = gsmisc.clouddata(timeStart,timeEnd,alldata,func='mvab',spacecraftID='WIND')    
+B_DataFrame = GSRM.clouddata(timeStart,timeEnd,alldata,func='mvab',spacecraftID='WIND')    
 
 # Get MVAB frame    
-MVAB_frame = gsmisc.MVAB(B_DataFrame, plotHodogram=True)    
+MVAB_frame = GSRM.MVAB(B_DataFrame, plotHodogram=True)    
 print(MVAB_frame)
 
 plt.show()
