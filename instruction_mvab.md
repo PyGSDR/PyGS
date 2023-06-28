@@ -6,7 +6,7 @@ spacecraft mission, as well as starting and ending times.
 import os
 import datetime
 import matplotlib.pyplot as plt
-import ReconstructionMisc as GSRM
+from PyGS import ReconstructionMisc as GSRM
 
 timeStart=datetime.datetime(2018,8,24,11,29,0) # starting    
 timeEnd=datetime.datetime(2018,8,24,17,10,0) # ending    
