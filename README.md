@@ -88,8 +88,8 @@ import PyGS
                  checkPtAFitting=False, helicityTwist=False)
 
   ```
-  > <img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png"> 
-  > <img width="375" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_check_PtA.png">
+  > <img width="370" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png"> 
+  > <img width="350" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_check_PtA.png">
 
 - The GSR function includes some calculations, e.g., HT frame analysis, MVAB, etc,. which can be run independently.
   - For HT analysis, please see [instruction_HT_analysis](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_HT_analysis.md).
