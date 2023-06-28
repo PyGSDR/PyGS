@@ -10,12 +10,16 @@ This package consists of two key products to serve as a set of comprehensive too
   - Applicable to SFRs with a broad definition including both static and dynamic structures
   - Applicable to PSP, Solar Orbiter, Ulysses, ACE, and WIND
   - Enhance and streamline from the original automated GSD (see [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection))
+  - Final outputs:
+    - an event list including several flux rope parameters
+    - a time-series plot showing flux rope intervals
 
 - The Grad-Shafranov (GS) type reconstruction (GSR, [Hu & Sonnuerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293)):
   - Visualize and characterize the 2D magnetic field configuration from 1D time-series data
   - Confirm the SFR detection results
   - Derive flux rope parameters, e.g., the poloidal and toroidal magnetic fluxes, the relative helicity, average twist, etc.
   - Useful for case studies
+  - Final outputs: a set of figures that showing flux rope features
 
 ## Python & Dependencies
 Python 3 | Numpy | SciPy | pandas | Matplotlib | ai.cdas | SpacePy
@@ -66,7 +70,7 @@ import PyGS
   from PyGS.ReconstructionMisc import reconstruction
 
   # Please specify the path to where the "examples" folder is saved.
-  # Parameter settings here need extra files in the "examples" folder.
+  # Parameter settings here are supported by files in the "examples" folder.
   # You may follow the instruction to start over with the initial settings.
 
   rootDir = '/home/ychen/Desktop/PyGS/examples/'
