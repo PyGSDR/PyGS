@@ -1,11 +1,11 @@
-# Instruction for GS detection (GSD) and examples 
+# Instruction for GS reconstruction (GSR) and examples 
 Here is a step-by-step instruction for the Grad-Shafranov Reconstruction (GSR).    
 This document also presents examples corresponding to changes in the main command line.    
 
 I. The full expression of the GSR main function:    
   ```python
   reconstruction(rootDir, spacecraftID='WIND', 
-                 FR_list=SFR_detection_list, eventNo=1,
+                 FR_list=SFR_detection_list, eventNo=0,
                  timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0), 
                  adjustAxis=True, 
                  grid_x=15, grid_y=131, 
@@ -20,30 +20,33 @@ II. This instruction will include:
 - Obtaining the flux rope axis (the 4th row)   
   - from the detection result    
   - from reconstruction     
-- Round 1 for reconstruction (may need to change parameters in the 5th & 6th rows)    
-- Round 2 for reconstruction (may need to change parameters in the 5th & 6th rows) 
+- Round 1 for reconstruction
+  - The 5th shows the default settings, and the 6th row shows initial settings
+  - May need to change during this round   
+- Round 2 for reconstruction (may need to change parameters in the 5th & 6th rows again) 
 - Add-on features (the 7th - 10th rows)   
 
 III. Notes:    
 - The GSR needs to run twice to have the final results.    
-- Except for the optional flux rope axis, the rest steps are common for both options.
+- Except for the optional flux rope axis, the rest steps in II are common for both options.    
+- The final outputs will include a set of figures showing flux rope features.    
 
 IV. For **non-Python users** or those who are not very familiar with Python:    
-- simply copy the command lines below to your terminal or into the script file "yourfile.py".
-    - for the latter, it means a file when you run $ python3 yourfile.py
+- Simply copy the command lines in block to your terminal or into the script file "yourfile.py".
+    - for the latter, it means a file when you run ```$ python3 yourfile.py```    
 - Please also pay attention to warnings & information printed on the terminal   
 
 ---
 ## 1. Initializing
 Initialization includes all lines before the main function ```reconstruction(...)``` as well as the first three rows inside it.
-- **rootDir**: set a directory where you would like to save files, such as downloaded & preprocessed data,    
-GS reconstructed figures, etc. E.g., ```rootDir = '/Users/Tom_and_Jerry/'```
+- **rootDir**: set a directory where you would like to save files, such as downloaded & preprocessed data, GS reconstructed figures, etc.    
+  - E.g., ```rootDir = '/Users/Tom_and_Jerry/'```
 - **spacecraftID**: specify the spacecraft ID, e.g., 'WIND', 'ACE', 'ULYSSES', 'PSP', 'SOLARORBITER'.    
-E.g., ```spacecraftID='WIND'```
-- **Flux rope timestamps**: can be either from detection or User-specified
+  - E.g., ```spacecraftID='WIND'```
+- **Flux rope timestamps**: can be either from detection or user-specified
   - If **detection**: here we use a record 08/24/2018 11:29:00 - 17:10:00 UT via the WIND spacecraft.
-    - No.53 in the detection file 2018_selected_events.p.
-    - Also need to specify the ```inputFileName``` and the event sequence number as ```eventNo```, and load the file.
+    - Specify the source of event list from the detection, i.e., ```inputFileName```
+    - It is the first event in the detection file selected_events.p, i.e., ```eventNo = 0```
     - The starting and ending times will be extracted automatically.
     - No need to indicate timestamps in ```reconstruction(...)```.    
     <br>
@@ -54,18 +57,18 @@ E.g., ```spacecraftID='WIND'```
     import datetime
     from PyGS.ReconstructionMisc import reconstruction
 
-    rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
-    inputFileName = 'events/2018_selected_events.p' # specify input file's name
+    rootDir = '/home/ychen/Desktop/PyGS/examples/' # specify rootDir
+    inputFileName = 'selected_events.p' # specify input file's name
     # load flux rope list from detection result
     SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
 
     # In reconstruction (...), specify spacecraft ID, FR_list, and eventNo.
     # The second line shows the initial settings of the GSR. MUST INCLUDE THE FIRST TWO.
-    reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+    reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)
 
     ```
-  - If **User-specified** or the detection result is unavailable:
+  - If **user-specified** or the detection result is unavailable:
     - One needs to specify ```timeStart``` and ```timeEnd```.
     - Data will be downloaded and processed automatically.
     <br>
@@ -76,7 +79,7 @@ E.g., ```spacecraftID='WIND'```
     import datetime
     from PyGS.ReconstructionMisc import reconstruction
 
-    rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
+    rootDir = '/home/ychen/Desktop/PyGS/examples/' # specify rootDir
     
     # In reconstruction (...), specify spacecraft ID, timeStart, and timeEnd.
     # The second line shows the initial settings of the GSR. MUST INCLUDE THE FIRST TWO.
@@ -86,24 +89,24 @@ E.g., ```spacecraftID='WIND'```
 
     ```
   - **Attention**:
-    - If both options are specified, i.e., ```FR_list=SFR_detection_list, eventNo=53, timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0)```,
-    - Will prioritize timestamps from the detection result.
+    - If both options are included, i.e., ```FR_list=SFR_detection_list, eventNo=0, timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0)```,
+    - Will prioritize timestamps from the detection result and neglect ```timeStart and timeEnd```.
   
 ## 2. Obtaining the flux rope axis  
 In this section, we will introduce how to proceed the reconstruction with the detection result and how to select the flux rope axis via the reconstruction.
 
 ### 2.1 From the detection result
 - Skip the rest of Section 2. Go to Section 3.
-  - Since we use the detection result, the flux rope axis will also be extracted automatically.
+  - Since we use the detection result, the flux rope axis will be extracted automatically as well.
   - Actually, the reconstruction is already started by copying the code block in Section 1.
 - If specifying timestamps manually in the last step, go to Section 2.2 to obtain a new axis.
 
 ### 2.2 From reconstruction 
 - Keep those lines above the main function ```reconstruction(...)```.    
 - Turn on ```adjustAxis``` in ```reconstruction(...)```.
-- Here, we would like to use timestamps of detection event No.53 while getting a new axis.
 - It will pop up four figures to let you decide whether this is a good axis.
 - Provide an answer on the terminal to proceed (see detailed info below).
+- Here, we would like to use timestamps of detection event No.0 while getting a new axis.
 
   ```python
   import pickle
@@ -111,15 +114,15 @@ In this section, we will introduce how to proceed the reconstruction with the de
   import datetime
   from PyGS.ReconstructionMisc import reconstruction
 
-  rootDir = '/home/ychen/Desktop/PyGS/' # specify rootDir
-  inputFileName = 'events/2018_selected_events.p' # specify input file's name
+  rootDir = '/home/ychen/Desktop/PyGS/examples/' # specify rootDir
+  inputFileName = 'selected_events.p' # specify input file's name
   # load flux rope list from detection result
   SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
 
   # In reconstruction (...), specify spacecraft ID, FR_list, and eventNo.
   # The second line shows the initial settings of the GSR. MUST INCLUDE THE FIRST TWO
   # The default setting of adjustAxis is False if not specified.
-  reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+  reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                  get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                  adjustAxis=True)
   ``` 
@@ -139,7 +142,8 @@ In this section, we will introduce how to proceed the reconstruction with the de
     > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_parameters_alongsc.png">
   - Four pressures versus A'.
     > Panels show Pt'(A'), Bz'(A'), p'(A'), and PBz'(A').    
-    > For a flux rope, it must have a good double-folding pattern between two branches of Pt'(A') or Bz'(A').    
+    > For a flux rope, it must have a good double-folding pattern between two branches of Pt'(A').    
+    > Bz'(A') curves usually also have the double-folding pattern except for those large-beta flux ropes.    
     > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_4_pressures.png">
     
 - On the terminal, it will ask you to answer "y" or "n" to **Is the optimal invariance direction found**?
@@ -151,13 +155,13 @@ In this section, we will introduce how to proceed the reconstruction with the de
   - If "y", all figures will be closed automatically and Figure 1 in Section 3.1 will appear (see below).
     - Now, it means you are ready for getting reconstruction results.
 
-- More information will be printed on the terminal:
+- In the meanwhile, the terminal will show information below:
   - Trial number
   - Three components of the minimum residue axis and selected axis.
   - Instruction on how to select an axis.
   - Figure information
 
-- The above procedure also proceeds with User-specified time intervals
+- The above procedure also proceeds with user-specified time intervals
   
 ## 3. Round 1 for reconstruction
 Durinng two rounds in Sections 3.1 & 3.2, we will mainly adjust the 5th & 6th rows in ```reconstruction(...)```.
@@ -180,14 +184,14 @@ Durinng two rounds in Sections 3.1 & 3.2, we will mainly adjust the 5th & 6th ro
 
 - Round 1: runs with initial settings
   - Here we only present results with the axis from the detection.
-  - Those with the axis from reconstruction will follow the same procedure. 
+    - Those with the axis from reconstruction will follow the same procedure. 
   - Since lines above the main function ```reconstruction(...)``` remain the same, we will focus on changes in controllers within
 ```reconstruction(...)```. Correspondingly, the code example will only display for ```reconstruction(...)```. 
 For non-Python users, remember to copy all those lines before this function when running.
 
     ```python
     # Using default grids, thus no need to specify grid_x or grid_y.
-    reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+    reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)
     ```    
 
@@ -210,7 +214,7 @@ For non-Python users, remember to copy all those lines before this function when
     -  ```dAl0``` and ```dAr0```: Usually can turn on ```checkPtAFitting``` to see whether they need changes.
 
        ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    checkPtAFitting=True)
         ```
@@ -224,7 +228,7 @@ For non-Python users, remember to copy all those lines before this function when
       
 ## 4. Round 2 for reconstruction
 ```python
-reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0)
 ```
 - The major change is to add the rest pressure terms in the extended GS equation, i.e., turning on ```pressureSwitch```.    
@@ -274,7 +278,7 @@ Change to True if would like to have any features.
     - In ```reconstruction(...)```, add ```plotJz = True```.    
 
         ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotJz=True)
         ```
@@ -283,7 +287,7 @@ Change to True if would like to have any features.
 - **plotHodogram**: plot hodograms of the magnetic field via the MVAB.
     - In ```reconstruction(...)```, add ```plotHodogram = True```.    
         ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotHodogram=True)
         ```
@@ -293,7 +297,7 @@ Change to True if would like to have any features.
 - **plotWalenRelation**: plot the Walen relation between V-remaining and VA.
     - In ```reconstruction(...)```, add ```plotWalenRelation = True```.    
         ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotWalenRelation=True)
         ```
@@ -304,7 +308,7 @@ Change to True if would like to have any features.
 - **plotSpacecraftTimeSeries**: plot the time-series data from spacecraft.
    - In ```reconstruction(...)```, add ```plotSpacecraftTimeSeries = True```.    
         ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotSpacecraftTimeSeries=True)
         ```
@@ -317,7 +321,7 @@ Change to True if would like to have any features.
     - In ```reconstruction(...)```, add ```adjustInterval = True```.    
 
        ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    adjustInterval=True)
         ```
@@ -339,7 +343,7 @@ Change to True if would like to have any features.
      - In ```reconstruction(...)```, add ```checkHT = True```.    
 
         ```python
-        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=53,
+        reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    checkHT=True)
         ```
@@ -355,8 +359,8 @@ Change to True if would like to have any features.
       - Figure information      
       - The maximum of the axial magnetic field **Bz**   = 7.403238594695631 nT      
       - The maximum of the axial current density **jz**  = 3.241255038840692e-12 A/m^2    
-      - Estimated **toroidal magnetic flux**             = 180038399696.94977 Wb    
-      - Estimated **poloidal magnetic flux** at 1 AU     = 1152801302589.8374 Wb    
-      - Estimated **relative helicity**                  = 0.00031948627788541526 nT^2/AU^2    
-      - Estimated **relative helicity per unit length**  = 0.00046711112871995975 nT^2/AU^3    
-      - Estimated **average twist**                      = 9.85648174146297e-27   
+      - Estimated **toroidal magnetic flux**             = 179317855413.55267 Wb    
+      - Estimated **poloidal magnetic flux** at 1 AU     = 1144618485766.9966 Wb    
+      - Estimated **relative helicity**                  = 0.00031573680494749977 nT^2AU^2    
+      - Estimated **relative helicity per unit length**  = 0.00046106158748134593 nT^2AU^3          
+      - Estimated **average twist per AU**               = 4.839753149634445
