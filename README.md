@@ -91,7 +91,7 @@ import PyGS
   > <img width="370" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png"> 
   > <img width="325" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_PtA.png">
 
-- The GSR function includes some calculations, e.g., HT frame analysis, MVAB, etc,. which can be run independently.
+- The GSR function includes some calculations, e.g., HT frame analysis, MVAB, etc., which can be run independently.
   - For HT analysis, please see [instruction_HT_analysis](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_HT_analysis.md).
   - For MVAB frame, please see [instruction_mvab](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_mvab.md).
 
