@@ -3,16 +3,19 @@ Here is a step-by-step instruction for the Grad-Shafranov-based detection.
 ## Main command line
 ```python
 import datetime
-from FluxRopeDetection import detection
+from PyGS.FluxRopeDetection import detection
 
 rootDir = '/Users/Tom_and_Jerry/' 
 shockList = rootDir + 'IPShock_ACE_or_WIND_or_Ulysses_1996_2016_DF.p'
 
-detection(rootDir, spacecraftID='WIND',
-          timeStart=datetime(2018,10,31,18,0,0), timeEnd=datetime(2018,10,31,22,0,0),
-          duration=(10,30), includeTe=True, includeNe=True,
-          Search=True, CombineRawResult=True, GetMoreInfo=True,
-          LabelFluxRope=True, B_mag_threshold=5.0, shockList_DF_path=shockList, allowIntvOverlap=False)
+if __name__ == "__main__":
+    detection(rootDir,spacecraftID='PSP',
+        timeStart=datetime(2018,10,31,18,0,0), timeEnd=datetime(2018,10,31,22,0,0),
+        duration=(10,30), includeTe=False, includeNe=False,
+        Search=True, CombineRawResult=True, GetMoreInfo=True,
+        LabelFluxRope=True, B_mag_threshold=5.0,
+        shockList_DF_path=shockList,
+        allowIntvOverlap=False)
 ```
 
 The main function is the above ```detection(...)```, which is the only function that needs to run for GSD.    
