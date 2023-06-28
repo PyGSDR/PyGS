@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
 The main function is the above ```detection(...)```, which is the only function that needs to run for GSD.    
 In addition, one has to specify the directory of 'rootDir' and the source of shock list.    
-The final results will be a time-series plot and a csv file including flux rope parameters.     
+The **final results** will be a time-series plot and a csv file including flux rope parameters.     
 
 ## Description
 The following describes each controller/parameter inside this function:<br><br>
@@ -37,13 +37,12 @@ The following describes each controller/parameter inside this function:<br><br>
 
 - **duration**: specify the duration range for detection.
     - ```duration=(10,30)```
-    - Here 10 is the lower limit, and 30 is the upper limit.
-    - During detection, it will be spilt into (10, 20) & (20, 30).
+        - Here 10 is the lower limit, and 30 is the upper limit.
+        - During detection, it will be spilt into (10, 20) & (20, 30). 
     - For general use, the lower limit is 10, and the upper limit is 360.        
-    - All windows will split with increments 10/20/40 points.    
+        - All windows will be split with increments 10/20/40 points.    
 
-- **includeTe**: 
-    - include the electron temperature in the transverse pressure Pt'.    
+- **includeTe**: include the electron temperature in the transverse pressure Pt'.    
     - ``` includeTe=True```    
 
 - **includeNe**: include the electron number density in the transverse pressure Pt'.    
@@ -54,13 +53,12 @@ The following describes each controller/parameter inside this function:<br><br>
     - Can be set to False if already have a raw result from the search.    
     - In such a case, a raw pickle file will be loaded.      
  
-- **CombineRawResult**: 
-    - the default setting is True to combine results via all search windows.    
+- **CombineRawResult**: the default setting is True to combine results via all search windows.    
     - ```CombineRawResult=True```    
     - Can be set to False if already have a combined result.    
     - In such a case, a combined pickle file will be loaded.        
 
-- **GetMoreInfo**: the default setting is True to calculate the average parameters, etc., within the flux rope interval.   
+- **GetMoreInfo**: the default setting is True to calculate the flux rope parameters.   
     - ```GetMoreInfo=True```   
     - Can be set to False if already have detailed info.    
     - In such a case, a detailed info pickle file will be loaded.        
@@ -71,7 +69,7 @@ The following describes each controller/parameter inside this function:<br><br>
 - **B_mag_threshold**: set a limit on the magnitude of the magnetic field (nT) to remove small fluctuations.    
     - ```B_mag_threshold=5.0```
   
-- **shockList_DF_path**: indicate the shock file to remove flux rope records containing shocks
+- **shockList_DF_path**: indicate the shock file to remove flux rope records containing shocks.
 
 - **allowIntvOverlap**: set to True if allow flux rope intervals to be overlapped with adjacent events.    
     - ```allowIntvOverlap=False```
