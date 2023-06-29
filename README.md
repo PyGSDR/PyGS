@@ -54,9 +54,9 @@ import PyGS
 
   if __name__ == "__main__":
       detection(rootDir, spacecraftID='WIND',
-          timeStart=datetime(2018,10,31,18,0,0), timeEnd=datetime(2018,10,31,20,0,0),
+          timeStart=datetime(2018,10,31,18,0,0), timeEnd=datetime(2018,10,31,22,0,0),
           duration=(10,30),
-          includeTe=False, includeNe=False,
+          includeTe=True, includeNe=False,
           Search=True, CombineRawResult=True, GetMoreInfo=True,
           LabelFluxRope=True,B_mag_threshold=5.0, shockList_DF_path=shockList, allowIntvOverlap=False)
   ```
