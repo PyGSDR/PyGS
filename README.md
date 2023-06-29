@@ -2,24 +2,24 @@
 Magnetic flux rope detection &amp; reconstruction based on the extended Grad-Shafranov equation.
 
 ## Introduction
-This package consists of two key products to serve as a set of comprehensive tools for the investigation of flux ropes.
+This package consists of two key products to serve as a set of comprehensive tools for the investigation of magnetic flux ropes (FRs) in space plasmas based on in-situ spacecraft measurements. See [fluxrope.info](http://www.fluxrope.info) for details. 
 - The Grad-Shafranov (GS)-based detection (GSD):
   - Automatedly identify flux ropes and output their parameters
   - Support the purpose of the statistical analysis
   - Rely on the generalized version of the GS equation ([Teh 2018](https://earth-planets-space.springeropen.com/articles/10.1186/s40623-018-0802-z))
-  - Applicable to SFRs with a broad definition including both static and dynamic structures
-  - Applicable to PSP, Solar Orbiter, Ulysses, ACE, and WIND
-  - Enhance and streamline from the original automated GSD (see [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection))
+  - Applicable to FRs with a broad definition including both static and dynamic structures
+  - Applicable to PSP, Solar Orbiter, Ulysses, ACE, and WIND spacecraft datasets
+  - Enhanced and streamlined from the original automated GSD (see [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection))
   - Final outputs:
-    - an event list including several flux rope parameters
-    - a time-series plot showing flux rope intervals
+    - an event list including selected flux rope parameters
+    - a time-series plot showing flux rope intervals and selected plots showing part of the analysis results
 
 - The Grad-Shafranov (GS) type reconstruction (GSR, [Hu & Sonnuerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293)):
   - Visualize and characterize the 2D magnetic field configuration from 1D time-series data
   - Confirm the SFR detection results
   - Derive flux rope parameters, e.g., the poloidal and toroidal magnetic fluxes, the relative helicity, average twist, etc.
   - Useful for case studies
-  - Final outputs: a set of figures that showing flux rope features
+  - Final outputs: a set of figures characterizing flux rope properties
 
 ## Python & Dependencies
 Python 3 | Numpy | SciPy | pandas | Matplotlib | ai.cdas | SpacePy
@@ -102,7 +102,7 @@ import PyGS
 - Python files for the original GSD are available on [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection).
 
 ## Acknowledgements
-We thank the help and previous work of Dr. Jinlei Zheng who created the original GSD, and acknowledge the NASA 80NSSC23K0256 for funding.
+We appreciate the help and previous work of Dr. Jinlei Zheng who created the original GSD, and acknowledge the NASA grant 80NSSC23K0256 for funding.
 
 ## Notes
 @Jun 27, 2023: 
