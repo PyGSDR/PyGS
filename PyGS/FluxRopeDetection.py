@@ -3181,8 +3181,8 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
             # Add first slot: [datetimeStart:eventList_DF_noOverlap.iloc[0]['startTime']].
             if datetimeStart<eventList_DF_noOverlap.iloc[0]['startTime']:
                 # An OrderedDict is a dictionary subclass that remembers the order in which its contents are added.
-                # oneSlot_temp = pd.DataFrame(OrderedDict((('slotStart', [datetimeStart]),('slotEnd', [eventList_DF_noOverlap.iloc[0]['startTime']]))))
-                #Append first slot to slotList_DF_temp.
+                oneSlot_temp = pd.DataFrame(OrderedDict((('slotStart', [datetimeStart]),('slotEnd', [eventList_DF_noOverlap.iloc[0]['startTime']]))))
+                # Append first slot to slotList_DF_temp.
                 # slotList_DF_temp = slotList_DF_temp.append(oneSlot_temp, ignore_index=True)
                 slotList_DF_temp = pd.concat([slotList_DF_temp,oneSlot_temp], axis=0)
             # Add last slot: [eventList_DF_noOverlap.iloc[-1]['endTime'] : datetimeEnd]
