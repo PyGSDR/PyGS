@@ -53,7 +53,7 @@ import PyGS
   shockList = rootDir + 'IPShock_ACE_or_WIND_or_Ulysses_1996_2016_DF.p' 
 
   if __name__ == "__main__":
-      detection(rootDir, spacecraftID='PSP',
+      detection(rootDir, spacecraftID='WIND',
           timeStart=datetime(2018,10,31,18,0,0), timeEnd=datetime(2018,10,31,20,0,0),
           duration=(10,30),
           includeTe=False, includeNe=False,
