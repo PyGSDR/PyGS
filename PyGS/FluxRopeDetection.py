@@ -2697,7 +2697,7 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
         eventList_DF_0_TargetedSlot_temp.reset_index(drop=True, inplace=True)
         if isVerbose:
             print('The total records before vs after this step: {} vs {}.'.format(len(eventList_DF_0_original_temp),len(eventList_DF_0_TargetedSlot_temp)))
-
+        # print(eventList_DF_0_TargetedSlot_temp)
         # ======================================================== S T E P. 1 ===========================================================
         # 1) Check point 1.
         if eventList_DF_0_TargetedSlot_temp.empty:
@@ -2711,6 +2711,7 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
         if isVerbose:
             print('The total records before vs after this step: {} vs {}.'.format(len(eventList_DF_0_TargetedSlot_temp),len(eventList_DF_1_CheckResidue_temp)))
         # print(eventList_DF_1_CheckResidue_temp)
+        # exit()
         # ======================================================== S T E P. 2 ===========================================================
         # 2) Check point 2.
         # After removing unqualified residue, check if eventList_DF_1_CheckResidue_temp is empty.
@@ -2861,8 +2862,8 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
                     Ta_inOriFrame_copy.bfill(inplace=True)
                     Ta_inOriFrame_copy.ffill(inplace=True)
                     if Ta_inOriFrame_copy.isnull().values.sum():
-                        print('Too many NaNs in Ta. Skip this record. If this situation happens, please check.')
-                        continue
+                        print('Too many NaNs in Ta.')
+                        # continue
                     else:
                         Ta_inOriFrame = Ta_inOriFrame_copy
 
@@ -2874,8 +2875,8 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
                     Na_inOriFrame_copy.bfill(inplace=True)
                     Na_inOriFrame_copy.ffill(inplace=True)
                     if Na_inOriFrame_copy.isnull().values.sum():
-                        print('Too many NaNs in Na. Skip this record. If this situation happens, please check.')
-                        continue
+                        print('Too many NaNs in NA.')
+                        # continue
                     else:
                         Na_inOriFrame = Na_inOriFrame_copy
 

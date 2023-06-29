@@ -790,6 +790,7 @@ def fitPtA(A, Pt, polyOrder, **kwargs):
     Arp = np.arange(Ar,max(A)+0.5,0.1) # All Ar points
     rexptail = np.exp(co1r*Arp + co2r)
 
+
     # Save file for Bz(A) results 
     # Re-run will need to call these parameters
     if pressureSwitch == 0:
@@ -836,7 +837,7 @@ def Ap_calculation(A, Bx, By, Ptp):
     
     # Get fitting parameters from function fitPtA
     Pt_A_fit_coeff, dPtdA, Al0, Ar0, co1, co2, co1r, co2r, residue = fitPtA(A, Ptp, polyOrder)
-    
+
     # Initialize 1D & 2D arrays
     # Ap_contour: A' contour on the cross-section map
     # dAdy has default size: 131 x 15
@@ -872,7 +873,7 @@ def Ap_calculation(A, Bx, By, Ptp):
                 # fitting curve of Pt(A)
                 dPt[j,i] = np.polyval(dPtdA,Ap_contour[j,i])
             rhs[j,i] = -dPt[j,i] # rhs = - dPtdA, note this is after normalized
-    
+
         kk = 1.00 
         yfactor = min(0.7,(y[j]-y[mid-1])/(y[ny-1]-y[mid-1]))
         k1, k2, k3 = kk*yfactor, 3.0-2.0*kk*yfactor, kk*yfactor
@@ -886,7 +887,7 @@ def Ap_calculation(A, Bx, By, Ptp):
                 dAdy_temp[j,i] = (k1*dAdy[j,i+1] + k2*dAdy[j,i] + k3*dAdy[j,i-1])/3;
         Ap_contour[j,:] = Ap_contour_temp[j,:].copy()
         dAdy[j,:] = dAdy_temp[j,:]
-    
+
         for i in range(nl-1, nr):
             if (i  ==  nl-1): # bottom boundary
                 dA2dx2 = (1.0/(hx**2))*(-5.0*Ap_contour[j,i+1] + 
@@ -1032,8 +1033,13 @@ def Bz_calculation(Ap_contour, B, Ab):
     Bz_from_A = np.sqrt(Bz2*2) # Bz2 is Fz2
     Bz_from_A_max = Bz_from_A.max()
     Bz_from_A_max_index = np.argwhere(Bz_from_A == Bz_from_A_max)
-    
+
     global J0, I0
+    if np.size(Bz_from_A_max_index) == 0:
+        print("\nError! A' and Bz have too many nan.")
+        print("Please adjust parameters to try again.")
+        exit()
+
     J0, I0 = Bz_from_A_max_index[0][0], Bz_from_A_max_index[0][1]
         
     if Ab/A0 < Al0z: Bz2b_from_Ab_pri = np.exp(co1z*Ab/A0+co2z)
@@ -1342,7 +1348,7 @@ def plotReconstruction(Ap, Bz, VA_mean, Bx, By, Ap_nr, Ptp_nr, Vx_rmn, Vy_rmn, *
     crossSection.plot(X0*1000, Y0*1000, marker = '.',color='w');
 
     # Plot remaining flow velocity & Bt vectors
-    arrow_scale = round(VA_mean/50)*100
+    arrow_scale = (round(VA_mean/50)+1)*100
     crossSection.quiver(np.append(1000*xe,xe[-4]*1000), 
                np.append(np.zeros(len(xe)),ye[9]*1000),
                np.append(Bx,1e-8/B_magni_max),
@@ -1813,11 +1819,13 @@ def reconstruction(yourPath, **kwargs):
     A_pri_contour, dPt, \
     Bx_from_A_contour_physical, By_from_A_contour_physical = Ap_calculation(Ap_nr,Bx_inFR_nr,By_inFR_nr,Pt_p_nr)
 
+
     # Return to values with unit before normalization
     A_contour = A_pri_contour*A0
     A_contour_physical = A_contour/(1-AlphaMach)
     # np.set_printoptions(threshold=np.inf)
     # print(A_contour)
+
     
     Bz_from_fit_physical = Bz_calculation(A_pri_contour,B_inFR,Ab)
     Jz_from_fit_physical = Jz_calculation(dPt)
