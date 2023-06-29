@@ -363,6 +363,210 @@ def download_data(source, data_cache_dir, datetimeStart, datetimeEnd, **kwargs):
     return data_dict
 
 #############################################################################################################
+def trim_drop_duplicates(target_dataframe, timeStart, timeEnd, drop):
+    """Some times cdas API will download wrong time range.
+    Trim data and drop duplicates."""
+
+    target_dataframe = target_dataframe[(target_dataframe.index>=timeStart)
+    &(target_dataframe.index<=timeEnd)]
+    if drop: 
+        target_dataframe.drop_duplicates(keep='first', inplace=True)
+    target_dataframe.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+    
+    return target_dataframe
+
+#############################################################################################################
+def butterworth_filter_3(X_dataframe, isVerbose, tag):
+    """Remove all data which fall outside three standard deviations.
+    Apply Butterworth filter.
+    This function treats dataframe with three components."""
+
+    if (tag == "V") or (tag == "V1"):
+        column_label = ['V0','V1','V2']
+        if tag == "V":
+            wn_range = [0.005, 0.05]
+        elif tag == "V1":
+            wn_range = [0.005] # random value since not use in the first run
+    elif tag == 'B':
+        column_label = ['B0','B1','B2']
+        wn_range = [0.45]
+    n_removed_X0_total, n_removed_X1_total, n_removed_X2_total = 0, 0, 0
+
+    # Apply Butterworth filter.
+    for Wn in wn_range:
+        if tag == 'V1':
+            X0_dif_std, X1_dif_std, X2_dif_std = X_dataframe.std(skipna=True, numeric_only=True)
+            X0_dif_mean, X1_dif_mean, X2_dif_mean = X_dataframe.mean(skipna=True, numeric_only=True)
+            X_dataframe_dif = X_dataframe.copy()
+        else:
+            # print('Applying Butterworth filter with cutoff frequency = {}, remove spikes...'.format(Wn))
+            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
+            X_dataframe.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
+            X_dataframe.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
+            # Create an empty DataFrame to store the filtered data.
+            X_dataframe_LowPass = pd.DataFrame(index = X_dataframe.index, columns = [column_label[0], column_label[1], column_label[2]])
+            # Design the Buterworth filter.
+            N  = 2    # Filter order
+            B, A = sp.signal.butter(N, Wn, output='ba')
+            # Apply the filter.
+            try:
+                X_dataframe_LowPass[column_label[0]] = sp.signal.filtfilt(B, A, X_dataframe[column_label[0]])
+            except:
+                print('Encounter exception, skip sp.signal.filtfilt operation!')
+                X_dataframe_LowPass[column_label[0]] = X_dataframe[column_label[0]].copy()
+            
+            try:
+                X_dataframe_LowPass[column_label[1]] = sp.signal.filtfilt(B, A, X_dataframe[column_label[1]])
+            except:
+                print('Encounter exception, skip sp.signal.filtfilt operation!')
+                X_dataframe_LowPass[column_label[1]] = X_dataframe[column_label[1]].copy()
+            
+            try:
+                X_dataframe_LowPass[column_label[2]] = sp.signal.filtfilt(B, A, X_dataframe[column_label[2]])
+            except:
+                print('Encounter exception, skip sp.signal.filtfilt operation!')
+                X_dataframe_LowPass[column_label[2]] = X_dataframe[column_label[2]].copy()
+
+            # Calculate the difference between X_dataframe_LowPass and X_dataframe.
+            X_dataframe_dif = pd.DataFrame(index = X_dataframe.index, columns = [column_label[0], column_label[1], column_label[2]]) # Generate empty DataFrame.
+            X_dataframe_dif[column_label[0]] = X_dataframe[column_label[0]] - X_dataframe_LowPass[column_label[0]]
+            X_dataframe_dif[column_label[1]] = X_dataframe[column_label[1]] - X_dataframe_LowPass[column_label[1]]
+            X_dataframe_dif[column_label[2]] = X_dataframe[column_label[2]] - X_dataframe_LowPass[column_label[2]]
+            # Calculate the mean and standard deviation of X_dataframe_dif.
+            X0_dif_std, X1_dif_std, X2_dif_std = X_dataframe_dif.std(skipna=True, numeric_only=True)
+            X0_dif_mean, X1_dif_mean, X2_dif_mean = X_dataframe_dif.mean(skipna=True, numeric_only=True)
+        # Set the values fall outside n*std to np.nan.
+        n_dif_std = 3.89 # 99.99%
+        # n_dif_std = 4.417 # ACE
+        X0_remove = (X_dataframe_dif[column_label[0]]<(X0_dif_mean-n_dif_std*X0_dif_std))|(X_dataframe_dif[column_label[0]]>(X0_dif_mean+n_dif_std*X0_dif_std))
+        X1_remove = (X_dataframe_dif[column_label[1]]<(X1_dif_mean-n_dif_std*X1_dif_std))|(X_dataframe_dif[column_label[1]]>(X1_dif_mean+n_dif_std*X1_dif_std))
+        X2_remove = (X_dataframe_dif[column_label[2]]<(X2_dif_mean-n_dif_std*X2_dif_std))|(X_dataframe_dif[column_label[2]]>(X2_dif_mean+n_dif_std*X2_dif_std))
+        X_dataframe[column_label[0]][X0_remove] = np.nan
+        X_dataframe[column_label[1]][X1_remove] = np.nan
+        X_dataframe[column_label[2]][X2_remove] = np.nan
+        
+        X0_dif_lower_boundary = X0_dif_mean-n_dif_std*X0_dif_std
+        X0_dif_upper_boundary = X0_dif_mean+n_dif_std*X0_dif_std
+        X1_dif_lower_boundary = X1_dif_mean-n_dif_std*X1_dif_std
+        X1_dif_upper_boundary = X1_dif_mean+n_dif_std*X1_dif_std
+        X2_dif_lower_boundary = X2_dif_mean-n_dif_std*X2_dif_std
+        X2_dif_upper_boundary = X2_dif_mean+n_dif_std*X2_dif_std
+        
+        n_removed_X0 = sum(X0_remove)
+        n_removed_X1 = sum(X1_remove)
+        n_removed_X2 = sum(X2_remove)
+        n_removed_X0_total += n_removed_X0
+        n_removed_X1_total += n_removed_X1
+        n_removed_X2_total += n_removed_X2
+        
+        if isVerbose:
+            print('dif_std:', X0_dif_std, X1_dif_std, X2_dif_std)
+            print('dif_mean:', X0_dif_mean, X1_dif_mean, X2_dif_mean)
+            print('The {}0_dif value range within {} std is [{}, {}]'.format(tag, n_dif_std, X0_dif_lower_boundary, X0_dif_upper_boundary))
+            print('The {}1_dif value range within {} std is [{}, {}]'.format(tag, n_dif_std, X1_dif_lower_boundary, X1_dif_upper_boundary))
+            print('The {}2_dif value range within {} std is [{}, {}]'.format(tag, n_dif_std, X2_dif_lower_boundary, X2_dif_upper_boundary))
+            print('In {}0, this operation removed {} records!'.format(tag, n_removed_X0))
+            print('In {}1, this operation removed {} records!'.format(tag, n_removed_X1))
+            print('In {}2, this operation removed {} records!!'.format(tag, n_removed_X2))
+            print('Till now, in {}0, {} records have been removed!'.format(tag, n_removed_X0_total))
+            print('Till now, in {}1, {} records have been removed!'.format(tag, n_removed_X1_total))
+            print('Till now, in {}2, {} records have been removed!'.format(tag, n_removed_X2_total))
+            print('\n')
+    return X_dataframe
+
+#############################################################################################################
+def butterworth_filter(X_dataframe, isVerbose, tag):   
+    """Remove all data which fall outside three standard deviations.
+    Apply Butterworth filter.
+    This function treats dataframe with only one component."""
+
+    if (tag == 'Na') or (tag == 'Ne') or (tag == 'Np') or (tag == 'alphaRatio'):
+        wn_range = [0.05,0.7]
+    elif (tag == 'Ta') or (tag == 'Te') or (tag == 'Tp'):
+        wn_range = [0.05, 0.45]
+
+    n_removed_X_total = 0
+    # print('Remove all X data which fall outside 3.89 standard deviations...')
+    n_std = 3.89 # 99.99%.
+    X_std = X_dataframe.std(skipna=True, numeric_only=True)[0]
+    X_mean = X_dataframe.mean(skipna=True, numeric_only=True)[0]
+    X_remove = (X_dataframe[tag]<(X_mean-n_std*X_std))|(X_dataframe[tag]>(X_mean+n_std*X_std))
+    X_dataframe[tag][X_remove] = np.nan
+
+    X_lower_boundary = X_mean-n_std*X_std
+    X_upper_boundary = X_mean+n_std*X_std
+
+    n_removed_X = sum(X_remove)
+    n_removed_X_total += n_removed_X
+
+    if isVerbose:
+        print('{}_std: {}'.format(tag, X_std))
+        print('{}_mean: {}'.format(tag, X_mean))
+        print('The {} value range within 3.89 std is [{}, {}]'.format(tag, X_lower_boundary, X_upper_boundary))
+        print('In {}, {} data has been removed!'.format(tag, n_removed_X))
+        print('Till now, in {}, {} records have been removed!'.format(tag, n_removed_X_total))
+        print('\n')
+
+    # Apply Butterworth filter to X.
+    for Wn in wn_range: # X
+        # Note that, sp.signal.butter cannot handle X.nan. Fill the nan before using it.
+        X_dataframe.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
+        X_dataframe.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
+        # Create an empty DataFrame to store the filtered data.
+        X_LowPass = pd.DataFrame(index = X_dataframe.index, columns = [tag])
+        # Design the Buterworth filter.
+        N  = 2    # Filter order
+        B, A = sp.signal.butter(N, Wn, output='ba')
+        # Apply the filter.
+        try:
+            X_LowPass[tag] = sp.signal.filtfilt(B, A, X_dataframe[tag])
+        except:
+            print('Encounter exception, skip sp.signal.filtfilt operation!')
+            X_LowPass[tag] = X_dataframe[tag].copy()
+        # Calculate the difference between X_LowPass and X_dataframe.
+        X_dif = pd.DataFrame(index = X_dataframe.index, columns = [tag]) # Generate empty DataFrame.
+        X_dif[tag] = X_dataframe[tag] - X_LowPass[tag]
+        # Calculate the mean and standard deviation of X_dif. X_dif_std is a Series object, so [0] is added.
+        X_dif_std = X_dif.std(skipna=True, numeric_only=True)[0]
+        X_dif_mean = X_dif.mean(skipna=True, numeric_only=True)[0]
+        # Set the values fall outside n*std to X.nan.
+        n_dif_std = 3.89 # 99.99%.
+        X_remove = (X_dif[tag]<(X_dif_mean-n_dif_std*X_dif_std))|(X_dif[tag]>(X_dif_mean+n_dif_std*X_dif_std))
+        X_dataframe[X_remove] = np.nan
+            
+        X_dif_lower_boundary = X_dif_mean-n_dif_std*X_dif_std
+        X_dif_upper_boundary = X_dif_mean+n_dif_std*X_dif_std
+            
+        n_removed_X = sum(X_remove)
+        n_removed_X_total += n_removed_X
+                
+        if isVerbose:
+            print('{}_dif_std: {}'.format(tag, X_dif_std))
+            print('{}_dif_mean: {}'.format(tag,X_dif_mean))
+            print('The {}_dif value range within 3 std is [{}, {}]'.format(tag,X_dif_lower_boundary, X_dif_upper_boundary))
+            print('In {}, this operation removed {} records!'.format(tag,n_removed_X))
+            print('Till now, in {}, {} records have been removed!'.format(tag,n_removed_X_total))
+
+    return X_dataframe
+
+def process_to_resolution(X_dataframe, resampledt, n_interp_limit, timeStart, timeEnd, tag):
+    """Interpolate/resample (usually downsample) data to fixed resolution"""
+
+    if tag == 'RD': n_interp_limit = None
+    # Linear fit first, to make sure there is no NaN. NaN will propagate by resample.
+    # Interpolate according to timestamps. Cannot handle boundary. Do not interpolate NaN longer than 10.
+    X_dataframe.interpolate(method='time', inplace=True, limit=n_interp_limit)
+    # Drop duplicated records, keep first one.
+    X_dataframe.drop_duplicates(keep='first', inplace=True)
+    # New added records will be filled with NaN.
+    X_dataframe = X_dataframe.resample(resampledt).mean()
+    X_dataframe.interpolate(method='time', inplace=True, limit=n_interp_limit)
+    X_dataframe = X_dataframe[(X_dataframe.index>=timeStart)\
+        &(X_dataframe.index<=timeEnd)]
+
+    return X_dataframe
+
+#############################################################################################################
 def preprocess_data(data_dict, data_pickle_dir, **kwargs):
     """This functions will process the downloaded file that was put into a dictionary. 
     Will read different spacecraft datasets first, and process together with 
@@ -557,6 +761,7 @@ def preprocess_data(data_dict, data_pickle_dir, **kwargs):
         if Ta is not None: Ta[Ta < 100] = np.nan
         if Na is not None: Na[Na < -1e+10] = np.nan
 
+        # Take spacecraft velocity into account
         V = np.sqrt(np.square(V_OriFrame_noVsc).sum(axis=1))
         V_HCI = np.sqrt(np.square(VHCI).sum(axis=1))
         HCI = np.sqrt(np.square(RD_vector).sum(axis=1))
@@ -617,18 +822,22 @@ def preprocess_data(data_dict, data_pickle_dir, **kwargs):
     if SW_Epoch is not None:
         V_OriFrame_DataFrame = pd.DataFrame(V_OriFrame, index = SW_Epoch, columns = ['V0', 'V1', 'V2'])
         Np_DataFrame = pd.DataFrame(Np, index = SW_Epoch, columns = ['Np'])
-        Tp_DataFrame = pd.DataFrame(Tp, index = SW_Epoch, columns = ['Tp'])
-        RD_DataFrame = pd.DataFrame(RD, index = RD_Epoch, columns = ['RD'])
+        Tp_DataFrame = pd.DataFrame(Tp, index = SW_Epoch, columns = ['Tp']) 
     else:
         V_OriFrame_DataFrame = pd.DataFrame(None, columns = ['Vx', 'Vy', 'Vz'])
         Np_DataFrame = pd.DataFrame(None, columns = ['Np'])
         Tp_DataFrame = pd.DataFrame(None, columns = ['Tp'])
         RD_DataFrame = pd.DataFrame(None, columns = ['RD'])
-
+    
     if V_OriFrame_DataFrame is None:
         print('\nError: the solar wind velocity data are unavailable during the current interval!')
         print('Please adjust the interval.')
         exit()
+
+    if RD_Epoch is not None:
+        RD_DataFrame = pd.DataFrame(RD, index = RD_Epoch, columns = ['RD'])
+    else:
+        RD_DataFrame = pd.DataFrame(None, columns = ['RD'])
 
     if 'Te' in locals(): Te_DataFrame = pd.DataFrame(Te, index = Te_Epoch, columns = ['Te'])
     if 'Ne' in locals(): Ne_DataFrame = pd.DataFrame(Ne, index = Ne_Epoch, columns = ['Ne'])
@@ -648,770 +857,105 @@ def preprocess_data(data_dict, data_pickle_dir, **kwargs):
 
     # Trim data. Some times cdas API will download wrong time range.
     if B_OriFrame_Epoch is not None:
-        B_OriFrame_DataFrame = B_OriFrame_DataFrame[(B_OriFrame_DataFrame.index>=timeStart)\
-        &(B_OriFrame_DataFrame.index<=timeEnd)]
+        B_OriFrame_DataFrame = trim_drop_duplicates(B_OriFrame_DataFrame, timeStart, timeEnd, drop=False)
     if SW_Epoch is not None:
-        V_OriFrame_DataFrame = V_OriFrame_DataFrame[(V_OriFrame_DataFrame.index>=timeStart)\
-        &(V_OriFrame_DataFrame.index<=timeEnd)]
-        Np_DataFrame = Np_DataFrame[(Np_DataFrame.index>=timeStart)&(Np_DataFrame.index<=timeEnd)]
-        Tp_DataFrame = Tp_DataFrame[(Tp_DataFrame.index>=timeStart)&(Tp_DataFrame.index<=timeEnd)]
+        V_OriFrame_DataFrame = trim_drop_duplicates(V_OriFrame_DataFrame, timeStart, timeEnd, drop=False)
+        Np_DataFrame = trim_drop_duplicates(Np_DataFrame, timeStart, timeEnd, drop=False)
+        Tp_DataFrame = trim_drop_duplicates(Tp_DataFrame, timeStart, timeEnd, drop=False)
     if RD is not None:
-        RD_DataFrame = RD_DataFrame[(RD_DataFrame.index>=timeStart)&(RD_DataFrame.index<=timeEnd)]
-
-    V_OriFrame_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
-    B_OriFrame_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
-    Np_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
-    Tp_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
-    RD_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
-
+        RD_DataFrame = trim_drop_duplicates(RD_DataFrame, timeStart, timeEnd, drop=False)
     if alphaRatio is not None:
-        alphaRatio_DataFrame = alphaRatio_DataFrame[(alphaRatio_DataFrame.index>=timeStart)\
-        &(alphaRatio_DataFrame.index<=timeEnd)]
-        alphaRatio_DataFrame.drop_duplicates(keep='first', inplace=True)
-        alphaRatio_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+        alphaRatio_DataFrame = trim_drop_duplicates(alphaRatio_DataFrame, timeStart, timeEnd, drop=True)
     if Na_Epoch is not None:
-        Na_DataFrame = Na_DataFrame[(Na_DataFrame.index>=timeStart)&(Na_DataFrame.index<=timeEnd)]
-        Na_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Na_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+        Na_DataFrame = trim_drop_duplicates(Na_DataFrame, timeStart, timeEnd, drop=True)
     if Ne_Epoch is not None:
-        Ne_DataFrame = Ne_DataFrame[(Ne_DataFrame.index>=timeStart)&(Ne_DataFrame.index<=timeEnd)]
-        Ne_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Ne_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+        Ne_DataFrame = trim_drop_duplicates(Ne_DataFrame, timeStart, timeEnd, drop=True)
     if Ta_Epoch is not None:
-        Ta_DataFrame = Ta_DataFrame[(Ta_DataFrame.index>=timeStart)&(Ta_DataFrame.index<=timeEnd)]
-        Ta_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Ta_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+        Ta_DataFrame = trim_drop_duplicates(Ta_DataFrame, timeStart, timeEnd, drop=True)
     if Te_Epoch is not None:
-        Te_DataFrame = Te_DataFrame[(Te_DataFrame.index>=timeStart)&(Te_DataFrame.index<=timeEnd)]
-        Te_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Te_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+        Te_DataFrame = trim_drop_duplicates(Te_DataFrame, timeStart, timeEnd, drop=True)
     if data_dict['ID'] == 'PSP': 
-        V_OriFrame_noVsc_DataFrame = V_OriFrame_noVsc_DataFrame[(V_OriFrame_noVsc_DataFrame.index>=timeStart)&(V_OriFrame_noVsc_DataFrame.index<=timeEnd)]
-        V_OriFrame_noVsc_DataFrame.drop_duplicates(keep='first', inplace=True)
-        V_OriFrame_noVsc_DataFrame.sort_index(axis=0, ascending=True, inplace=True, kind='quicksort')
+        V_OriFrame_noVsc_DataFrame = trim_drop_duplicates(V_OriFrame_noVsc_DataFrame, timeStart, timeEnd, drop=False)
     
-    # print('\nProcessing data...')
-    #====================================== Process B_OriFrame  ======================================
+    
+    ##################################################################################################
+    
+    # Processing data...
+
+    # ====================================== Process B_OriFrame  ======================================
     # print('\nProcessing B...')
     # Keep original data.
     B_OriFrame_DataFrame0 = B_OriFrame_DataFrame.copy(deep=True)
-    #print('B_OriFrame_DataFrame.shape = {}'.format(B_OriFrame_DataFrame.shape))
-    n_removed_B0_total, n_removed_B1_total, n_removed_B2_total = 0, 0, 0
-
+    # #print('B_OriFrame_DataFrame.shape = {}'.format(B_OriFrame_DataFrame.shape))
     # Apply Butterworth filter.
-    for Wn in [0.45]:
-        # print('Applying Butterworth filter with cutoff frequency = {}, remove spikes...'.format(Wn))
-        # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-        B_OriFrame_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-        B_OriFrame_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-        # Create an empty DataFrame to store the filtered data.
-        B_OriFrame_LowPass = pd.DataFrame(index = B_OriFrame_DataFrame.index, columns = ['B0', 'B1', 'B2'])
-        # Design the Buterworth filter.
-        N  = 2    # Filter order
-        B, A = sp.signal.butter(N, Wn, output='ba')
-        # Apply the filter.
-        try:
-            B_OriFrame_LowPass['B0'] = sp.signal.filtfilt(B, A, B_OriFrame_DataFrame['B0'])
-        except:
-            print('Encounter exception, skip sp.signal.filtfilt operation!')
-            B_OriFrame_LowPass['B0'] = B_OriFrame_DataFrame['B0'].copy()
-            
-        try:
-            B_OriFrame_LowPass['B1'] = sp.signal.filtfilt(B, A, B_OriFrame_DataFrame['B1'])
-        except:
-            print('Encounter exception, skip sp.signal.filtfilt operation!')
-            B_OriFrame_LowPass['B1'] = B_OriFrame_DataFrame['B1'].copy()
-            
-        try:
-            B_OriFrame_LowPass['B2'] = sp.signal.filtfilt(B, A, B_OriFrame_DataFrame['B2'])
-        except:
-            print('Encounter exception, skip sp.signal.filtfilt operation!')
-            B_OriFrame_LowPass['B2'] = B_OriFrame_DataFrame['B2'].copy()
+    B_OriFrame_DataFrame = butterworth_filter_3(B_OriFrame_DataFrame, isVerbose, tag="B")
 
-        # Calculate the difference between B_OriFrame_LowPass and B_OriFrame_DataFrame.
-        B_OriFrame_dif = pd.DataFrame(index = B_OriFrame_DataFrame.index, columns = ['B0', 'B1', 'B2']) # Generate empty DataFrame.
-        B_OriFrame_dif['B0'] = B_OriFrame_DataFrame['B0'] - B_OriFrame_LowPass['B0']
-        B_OriFrame_dif['B1'] = B_OriFrame_DataFrame['B1'] - B_OriFrame_LowPass['B1']
-        B_OriFrame_dif['B2'] = B_OriFrame_DataFrame['B2'] - B_OriFrame_LowPass['B2']
-        # Calculate the mean and standard deviation of B_OriFrame_dif.
-        B0_dif_std, B1_dif_std, B2_dif_std = B_OriFrame_dif.std(skipna=True, numeric_only=True)
-        B0_dif_mean, B1_dif_mean, B2_dif_mean = B_OriFrame_dif.mean(skipna=True, numeric_only=True)
-        # Set the values fall outside n*std to np.nan.
-        n_dif_std = 3.89 # 99.99%
-        # n_dif_std = 4.417 # ACE
-        B0_remove = (B_OriFrame_dif['B0']<(B0_dif_mean-n_dif_std*B0_dif_std))|(B_OriFrame_dif['B0']>(B0_dif_mean+n_dif_std*B0_dif_std))
-        B1_remove = (B_OriFrame_dif['B1']<(B1_dif_mean-n_dif_std*B1_dif_std))|(B_OriFrame_dif['B1']>(B1_dif_mean+n_dif_std*B1_dif_std))
-        B2_remove = (B_OriFrame_dif['B2']<(B2_dif_mean-n_dif_std*B2_dif_std))|(B_OriFrame_dif['B2']>(B2_dif_mean+n_dif_std*B2_dif_std))
-        B_OriFrame_DataFrame['B0'][B0_remove] = np.nan
-        B_OriFrame_DataFrame['B1'][B1_remove] = np.nan
-        B_OriFrame_DataFrame['B2'][B2_remove] = np.nan
-        
-        B0_dif_lower_boundary = B0_dif_mean-n_dif_std*B0_dif_std
-        B0_dif_upper_boundary = B0_dif_mean+n_dif_std*B0_dif_std
-        B1_dif_lower_boundary = B1_dif_mean-n_dif_std*B1_dif_std
-        B1_dif_upper_boundary = B1_dif_mean+n_dif_std*B1_dif_std
-        B2_dif_lower_boundary = B2_dif_mean-n_dif_std*B2_dif_std
-        B2_dif_upper_boundary = B2_dif_mean+n_dif_std*B2_dif_std
-        
-        n_removed_B0 = sum(B0_remove)
-        n_removed_B1 = sum(B1_remove)
-        n_removed_B2 = sum(B2_remove)
-        n_removed_B0_total += n_removed_B0
-        n_removed_B1_total += n_removed_B1
-        n_removed_B2_total += n_removed_B2
-        
-        if isVerbose:
-            print('B_dif_std:', B0_dif_std, B1_dif_std, B2_dif_std)
-            print('B_dif_mean:', B0_dif_mean, B1_dif_mean, B2_dif_mean)
-            print('The B_OriFrame B0_dif value range within {} std is [{}, {}]'.format(n_dif_std, B0_dif_lower_boundary, B0_dif_upper_boundary))
-            print('The B_OriFrame B1_dif value range within {} std is [{}, {}]'.format(n_dif_std, B1_dif_lower_boundary, B1_dif_upper_boundary))
-            print('The B_OriFrame B2_dif value range within {} std is [{}, {}]'.format(n_dif_std, B2_dif_lower_boundary, B2_dif_upper_boundary))
-            print('In B0, this operation removed {} records!'.format(n_removed_B0))
-            print('In B1, this operation removed {} records!'.format(n_removed_B1))
-            print('In B2, this operation removed {} records!!'.format(n_removed_B2))
-            print('Till now, in B0, {} records have been removed!'.format(n_removed_B0_total))
-            print('Till now, in B1, {} records have been removed!'.format(n_removed_B1_total))
-            print('Till now, in B2, {} records have been removed!'.format(n_removed_B2_total))
-            print('\n')
-        #========================================= Process V_OriFrame =========================================
     # ===================================== Process V_OriFrame  ======================================
     if not V_OriFrame_DataFrame.empty:
         # print('\nProcessing V...')
         # Keep original data.
         V_OriFrame_DataFrame0 = V_OriFrame_DataFrame.copy(deep=True)
         # Remove all data which fall outside three standard deviations.
-        n_removed_V0_total, n_removed_V1_total, n_removed_V2_total = 0, 0, 0
-        n_std = 3.89 # 99.99%.
-        V0_std, V1_std, V2_std = V_OriFrame_DataFrame.std(skipna=True, numeric_only=True)
-        V0_mean, V1_mean, V2_mean = V_OriFrame_DataFrame.mean(skipna=True, numeric_only=True)
-        V0_remove = (V_OriFrame_DataFrame['V0']<(V0_mean-n_std*V0_std))|(V_OriFrame_DataFrame['V0']>(V0_mean+n_std*V0_std))
-        V1_remove = (V_OriFrame_DataFrame['V1']<(V1_mean-n_std*V1_std))|(V_OriFrame_DataFrame['V1']>(V1_mean+n_std*V1_std))
-        V2_remove = (V_OriFrame_DataFrame['V2']<(V2_mean-n_std*V2_std))|(V_OriFrame_DataFrame['V2']>(V2_mean+n_std*V2_std))
-        V_OriFrame_DataFrame['V0'][V0_remove] = np.nan
-        V_OriFrame_DataFrame['V1'][V1_remove] = np.nan
-        V_OriFrame_DataFrame['V2'][V2_remove] = np.nan
-
-        V0_lower_boundary = V0_mean-n_std*V0_std
-        V0_upper_boundary = V0_mean+n_std*V0_std
-        V1_lower_boundary = V1_mean-n_std*V1_std
-        V1_upper_boundary = V1_mean+n_std*V1_std
-        V2_lower_boundary = V2_mean-n_std*V2_std
-        V2_upper_boundary = V2_mean+n_std*V2_std
-
-        n_removed_V0 = sum(V0_remove)
-        n_removed_V1 = sum(V1_remove)
-        n_removed_V2 = sum(V2_remove)
-        n_removed_V0_total += n_removed_V0
-        n_removed_V1_total += n_removed_V1
-        n_removed_V2_total += n_removed_V2
-
-        if isVerbose:
-            print('\nRemove all V_OriFrame data which fall outside three standard deviations...')
-            print('V_std:', V0_std, V1_std, V2_std)
-            print('V_mean:', V0_mean, V1_mean, V2_mean)
-            print('The V_OriFrame V0 value range within {} std is [{}, {}]'.format(n_std, V0_lower_boundary, V0_upper_boundary))
-            print('The V_OriFrame V1 value range within {} std is [{}, {}]'.format(n_std, V1_lower_boundary, V1_upper_boundary))
-            print('The V_OriFrame V2 value range within {} std is [{}, {}]'.format(n_std, V2_lower_boundary, V2_upper_boundary))
-            print('In V0, {} data has been removed!'.format(n_removed_V0))
-            print('In V1, {} data has been removed!'.format(n_removed_V1))
-            print('In V2, {} data has been removed!'.format(n_removed_V2))
-            print('Until now, in V0, {} records have been removed!'.format(n_removed_V0_total))
-            print('Until now, in V1, {} records have been removed!'.format(n_removed_V1_total))
-            print('Until now, in V2, {} records have been removed!'.format(n_removed_V2_total))
-            print('\n')
-
-            # Apply Butterworth filter two times.
-        for Wn in [0.005, 0.05]:
-            # if Wn==0.005: print('Applying Butterworth filter with cutoff frequency = 0.005, remove large outliers...')
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove spikes...')
-            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            V_OriFrame_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            V_OriFrame_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            # Create an empty DataFrame to store the filtered data.
-            V_OriFrame_LowPass = pd.DataFrame(index = V_OriFrame_DataFrame.index, columns = ['V0', 'V1', 'V2'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                V_OriFrame_LowPass['V0'] = sp.signal.filtfilt(B, A, V_OriFrame_DataFrame['V0'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                V_OriFrame_LowPass['V0'] = V_OriFrame_DataFrame['V0'].copy()
-                    
-            try:
-                V_OriFrame_LowPass['V1'] = sp.signal.filtfilt(B, A, V_OriFrame_DataFrame['V1'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                V_OriFrame_LowPass['V1'] = V_OriFrame_DataFrame['V1'].copy()
-                    
-            try:
-                V_OriFrame_LowPass['V2'] = sp.signal.filtfilt(B, A, V_OriFrame_DataFrame['V2'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                V_OriFrame_LowPass['V2'] = V_OriFrame_DataFrame['V2'].copy()
-                
-            # Calculate the difference between V_OriFrame_LowPass and V_OriFrame_DataFrame.
-            V_OriFrame_dif = pd.DataFrame(index = V_OriFrame_DataFrame.index, columns = ['V0', 'V1', 'V2']) # Generate empty DataFrame.
-            V_OriFrame_dif['V0'] = V_OriFrame_DataFrame['V0'] - V_OriFrame_LowPass['V0']
-            V_OriFrame_dif['V1'] = V_OriFrame_DataFrame['V1'] - V_OriFrame_LowPass['V1']
-            V_OriFrame_dif['V2'] = V_OriFrame_DataFrame['V2'] - V_OriFrame_LowPass['V2']
-            # Calculate the mean and standard deviation of V_OriFrame_dif.
-            V0_dif_std, V1_dif_std, V2_dif_std = V_OriFrame_dif.std(skipna=True, numeric_only=True)
-            V0_dif_mean, V1_dif_mean, V2_dif_mean = V_OriFrame_dif.mean(skipna=True, numeric_only=True)
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%
-            V0_remove = (V_OriFrame_dif['V0']<(V0_dif_mean-n_dif_std*V0_dif_std))|(V_OriFrame_dif['V0']>(V0_dif_mean+n_dif_std*V0_dif_std))
-            V1_remove = (V_OriFrame_dif['V1']<(V1_dif_mean-n_dif_std*V1_dif_std))|(V_OriFrame_dif['V1']>(V1_dif_mean+n_dif_std*V1_dif_std))
-            V2_remove = (V_OriFrame_dif['V2']<(V2_dif_mean-n_dif_std*V2_dif_std))|(V_OriFrame_dif['V2']>(V2_dif_mean+n_dif_std*V2_dif_std))
-            V_OriFrame_DataFrame['V0'][V0_remove] = np.nan
-            V_OriFrame_DataFrame['V1'][V1_remove] = np.nan
-            V_OriFrame_DataFrame['V2'][V2_remove] = np.nan
-            
-            V0_dif_lower_boundary = V0_dif_mean-n_std*V0_dif_std
-            V0_dif_upper_boundary = V0_dif_mean+n_std*V0_dif_std
-            V1_dif_lower_boundary = V1_dif_mean-n_std*V1_dif_std
-            V1_dif_upper_boundary = V1_dif_mean+n_std*V1_dif_std
-            V2_dif_lower_boundary = V2_dif_mean-n_std*V2_dif_std
-            V2_dif_upper_boundary = V2_dif_mean+n_std*V2_dif_std
-            
-            n_removed_V0 = sum(V0_remove)
-            n_removed_V1 = sum(V1_remove)
-            n_removed_V2 = sum(V2_remove)
-            n_removed_V0_total += n_removed_V0
-            n_removed_V1_total += n_removed_V1
-            n_removed_V2_total += n_removed_V2
-                
-            if isVerbose:
-                print('V_dif_std:', V0_dif_std, V1_dif_std, V2_dif_std)
-                print('V_dif_mean:', V0_dif_mean, V1_dif_mean, V2_dif_mean)
-                print('The V_OriFrame V0_dif value range within {} std is [{}, {}]'.format(n_dif_std, V0_dif_lower_boundary, V0_dif_upper_boundary))
-                print('The V_OriFrame V1_dif value range within {} std is [{}, {}]'.format(n_dif_std, V1_dif_lower_boundary, V1_dif_upper_boundary))
-                print('The V_OriFrame V2_dif value range within {} std is [{}, {}]'.format(n_dif_std, V2_dif_lower_boundary, V2_dif_upper_boundary))
-                print('In V0, this operation removed {} records!'.format(n_removed_V0))
-                print('In V1, this operation removed {} records!'.format(n_removed_V1))
-                print('In V2, this operation removed {} records!!'.format(n_removed_V2))
-                print('Until now, in V0, {} records have been removed!'.format(n_removed_V0_total))
-                print('Until now, in V1, {} records have been removed!'.format(n_removed_V1_total))
-                print('Until now, in V2, {} records have been removed!'.format(n_removed_V2_total))
-                print('\n')      
-
+        V_OriFrame_DataFrame = butterworth_filter_3(V_OriFrame_DataFrame, isVerbose, tag="V1")
+        # Apply Butterworth filter two times.
+        V_OriFrame_DataFrame = butterworth_filter_3(V_OriFrame_DataFrame, isVerbose, tag="V")
+  
     # ========================================  Process Np   =========================================
     if not Np_DataFrame.empty:
         # print('\nProcessing Np...')
         # Keep original data.
         Np_DataFrame0 = Np_DataFrame.copy(deep=True)
-        #print('Np_DataFrame.shape = {}'.format(Np_DataFrame.shape))
-        # Remove all data which fall outside 4 standard deviations.
-        n_removed_Np_total = 0
-        # print('Remove all Np data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.
-        Np_std = Np_DataFrame.std(skipna=True, numeric_only=True)[0]
-        Np_mean = Np_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        Np_remove = (Np_DataFrame['Np']<(Np_mean-n_std*Np_std))|(Np_DataFrame['Np']>(Np_mean+n_std*Np_std))
-        Np_DataFrame['Np'][Np_remove] = np.nan
-
-        Np_lower_boundary = Np_mean-n_std*Np_std
-        Np_upper_boundary = Np_mean+n_std*Np_std
-
-        n_removed_Np = sum(Np_remove)
-        n_removed_Np_total += n_removed_Np
-
-        if isVerbose:
-            print('Np_std:', Np_std)
-            print('Np_mean:', Np_mean)
-            print('The Np value range within 3.89 std is [{}, {}]'.format(Np_lower_boundary, Np_upper_boundary))
-            print('In Np, {} data has been removed!'.format(n_removed_Np))
-            print('Till now, in Np, {} records have been removed!'.format(n_removed_Np_total))
-            print('\n')
-
-            # Apply Butterworth filter to Np.
-        for Wn in [0.05, 0.7]: # Np
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.7: print('Applying Butterworth filter with cutoff frequency = 0.7, remove spikes...')
-            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            Np_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            Np_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            # Create an empty DataFrame to store the filtered data.
-            Np_LowPass = pd.DataFrame(index = Np_DataFrame.index, columns = ['Np'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                Np_LowPass['Np'] = sp.signal.filtfilt(B, A, Np_DataFrame['Np'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                Np_LowPass['Np'] = Np_DataFrame['Np'].copy()
-            # Calculate the difference between Np_LowPass and Np_DataFrame.
-            Np_dif = pd.DataFrame(index = Np_DataFrame.index, columns = ['Np']) # Generate empty DataFrame.
-            Np_dif['Np'] = Np_DataFrame['Np'] - Np_LowPass['Np']
-            # Calculate the mean and standard deviation of Np_dif. Np_dif_std is a Series object, so [0] is added.
-            Np_dif_std = Np_dif.std(skipna=True, numeric_only=True)[0]
-            Np_dif_mean = Np_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%.
-            Np_remove = (Np_dif['Np']<(Np_dif_mean-n_dif_std*Np_dif_std))|(Np_dif['Np']>(Np_dif_mean+n_dif_std*Np_dif_std))
-            Np_DataFrame[Np_remove] = np.nan
-            
-            Np_dif_lower_boundary = Np_dif_mean-n_dif_std*Np_dif_std
-            Np_dif_upper_boundary = Np_dif_mean+n_dif_std*Np_dif_std
-            
-            n_removed_Np = sum(Np_remove)
-            n_removed_Np_total += n_removed_Np
-                
-            if isVerbose:
-                print('Np_dif_std:', Np_dif_std)
-                print('Np_dif_mean:', Np_dif_mean)
-                print('The Np_dif value range within 3 std is [{}, {}]'.format(Np_dif_lower_boundary, Np_dif_upper_boundary))
-                print('In Np, this operation removed {} records!'.format(n_removed_Np))
-                print('Till now, in Np, {} records have been removed!'.format(n_removed_Np_total))
+        # print('Np_DataFrame.shape = {}'.format(Np_DataFrame.shape))
+        Np_DataFrame = butterworth_filter(Np_DataFrame, isVerbose, tag='Np')
 
     # ========================================= Process Tp   =========================================
     if not Tp_DataFrame.empty:
         # print('\nProcessing Tp...')
         # Keep original data.
         Tp_DataFrame0 = Tp_DataFrame.copy(deep=True)
-
-        # Remove all data which fall outside 4 standard deviations.
-        n_removed_Tp_total = 0
-        # print('Remove all Tp data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.
-        Tp_std = Tp_DataFrame.std(skipna=True, numeric_only=True)[0]
-        Tp_mean = Tp_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        Tp_remove = (Tp_DataFrame['Tp']<(Tp_mean-n_std*Tp_std))|(Tp_DataFrame['Tp']>(Tp_mean+n_std*Tp_std))
-        Tp_DataFrame['Tp'][Tp_remove] = np.nan
-
-        Tp_lower_boundary = Tp_mean-n_std*Tp_std
-        Tp_upper_boundary = Tp_mean+n_std*Tp_std
-
-        n_removed_Tp = sum(Tp_remove)
-        n_removed_Tp_total += n_removed_Tp
-
-        if isVerbose:
-            print('Tp_std:', Tp_std)
-            print('Tp_mean:', Tp_mean)
-            print('The Tp value range within 3.89 std is [{}, {}]'.format(Tp_lower_boundary, Tp_upper_boundary))
-            print('In Tp, {} data has been removed!'.format(n_removed_Tp))
-            print('Till now, in Tp, {} records have been removed!'.format(n_removed_Tp_total))
-            print('\n')
-
-            # Apply Butterworth filter.
-        for Wn in [0.05, 0.7]: # Tp
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.7: print('Applying Butterworth filter with cutoff frequency = 0.7, remove spikes...')
-            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            Tp_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            Tp_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            # Create an empty DataFrame to store the filtered data.
-            Tp_LowPass = pd.DataFrame(index = Tp_DataFrame.index, columns = ['Tp'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                Tp_LowPass['Tp'] = sp.signal.filtfilt(B, A, Tp_DataFrame['Tp'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                Tp_LowPass['Tp'] = Tp_DataFrame['Tp'].copy()
-            # Calculate the difference between Tp_LowPass and Tp_DataFrame.
-            Tp_dif = pd.DataFrame(index = Tp_DataFrame.index, columns = ['Tp']) # Generate empty DataFrame.
-            Tp_dif['Tp'] = Tp_DataFrame['Tp'] - Tp_LowPass['Tp']
-            # Calculate the mean and standard deviation of Tp_dif. Tp_dif_std is a Series object, so [0] is added.
-            Tp_dif_std = Tp_dif.std(skipna=True, numeric_only=True)[0]
-            Tp_dif_mean = Tp_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%.
-            Tp_remove = (Tp_dif['Tp']<(Tp_dif_mean-n_dif_std*Tp_dif_std))|(Tp_dif['Tp']>(Tp_dif_mean+n_dif_std*Tp_dif_std))
-            Tp_DataFrame[Tp_remove] = np.nan
-            
-            Tp_dif_lower_boundary = Tp_dif_mean-n_dif_std*Tp_dif_std
-            Tp_dif_upper_boundary = Tp_dif_mean+n_dif_std*Tp_dif_std
-            
-            n_removed_Tp = sum(Tp_remove)
-            n_removed_Tp_total += n_removed_Tp
-            
-            if isVerbose:
-                print('Tp_dif_std:', Tp_dif_std)
-                print('Tp_dif_mean:', Tp_dif_mean)
-                print('The Tp_dif value range within 3 std is [{}, {}]'.format(Tp_dif_lower_boundary, Tp_dif_upper_boundary))
-                print('In Tp, this operation removed {} records!'.format(n_removed_Tp))
-                print('Till now, in Tp, {} records have been removed!'.format(n_removed_Tp_total))
-                print('\n')
+        # print('Tp_DataFrame.shape = {}'.format(Tp_DataFrame.shape))
+        Tp_DataFrame = butterworth_filter(Tp_DataFrame, isVerbose, tag='Tp')
 
     # ========================================= Process Ne  =========================================            
     if not Ne_DataFrame.empty:
         # print('\nProcessing Ne...')
         # Keep originel data.
         Ne_DataFrame0 = Ne_DataFrame.copy(deep=True)
-        #print('Ne_DataFrame.shape = {}'.format(Ne_DataFrame.shape))
-
-        # Remove all data which fall outside 4 standard deviations.
-        n_removed_Ne_total = 0
-        # print('Remove all Ne data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.      
-        Ne_std = Ne_DataFrame.std(skipna=True, numeric_only=True)[0]
-        Ne_mean = Ne_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        Ne_remove = (Ne_DataFrame['Ne']<(Ne_mean-n_std*Ne_std))|(Ne_DataFrame['Ne']>(Ne_mean+n_std*Ne_std))
-        Ne_DataFrame['Ne'][Ne_remove] = np.nan
-
-        Ne_lower_boundary = Ne_mean-n_std*Ne_std
-        Ne_upper_boundary = Ne_mean+n_std*Ne_std
-
-        n_removed_Ne = sum(Ne_remove)
-        n_removed_Ne_total += n_removed_Ne
-
-        if isVerbose:
-            print('Ne_std:', Ne_std)
-            print('Ne_mean:', Ne_mean)
-            print('The Ne value range within 3.89 std is [{}, {}]'.format(Ne_lower_boundary, Ne_upper_boundary))
-            print('In Ne, {} data has been removed!'.format(n_removed_Ne))
-            print('Till now, in Ne, {} records have been removed!'.format(n_removed_Ne_total))
-            print('\n')
-
-        # Apply Butterworth filter to Ne.
-        for Wn in [0.05, 0.7]: # Ne
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.7: print('Applying Butterworth filter with cutoff frequency = 0.7, remove spikes...')
-            # Note that, sp.signel.butter cannot handle np.nen. Fill the nen before using it.
-            Ne_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            Ne_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            if Ne_DataFrame.isnull().values.sum():
-                print('Too many NaNs in Ne. Skip.')
-                continue              
-            # Create an empty DataFrame to store the filtered data.
-            Ne_LowPass = pd.DataFrame(index = Ne_DataFrame.index, columns = ['Ne'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                 Ne_LowPass['Ne'] = sp.signal.filtfilt(B, A, Ne_DataFrame['Ne'])
-            except: 
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                Ne_LowPass['Ne'] = Ne_DataFrame['Ne'].copy()
-            # Calculate the difference between Ne_LowPass and Ne_DataFrame.
-            Ne_dif = pd.DataFrame(index = Ne_DataFrame.index, columns = ['Ne']) # Generate empty DataFrame.
-            Ne_dif['Ne'] = Ne_DataFrame['Ne'] - Ne_LowPass['Ne']
-            # Calculate the mean and standard deviation of Ne_dif. Ne_dif_std is a Series object, so [0] is added.
-            Ne_dif_std = Ne_dif.std(skipna=True, numeric_only=True)[0]
-            Ne_dif_mean = Ne_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nen.
-            n_dif_std = 3.89 # 99.99%.
-            Ne_remove = (Ne_dif['Ne']<(Ne_dif_mean-n_dif_std*Ne_dif_std))|(Ne_dif['Ne']>(Ne_dif_mean+n_dif_std*Ne_dif_std))
-            Ne_DataFrame[Ne_remove] = np.nan
-            
-            Ne_dif_lower_boundary = Ne_dif_mean-n_dif_std*Ne_dif_std
-            Ne_dif_upper_boundary = Ne_dif_mean+n_dif_std*Ne_dif_std
-            
-            n_removed_Ne = sum(Ne_remove)
-            n_removed_Ne_total += n_removed_Ne
-            
-            if isVerbose:
-                print('Ne_dif_std:', Ne_dif_std)
-                print('Ne_dif_mean:', Ne_dif_mean)
-                print('The Ne_dif value range within 3 std is [{}, {}]'.format(Ne_dif_lower_boundary, Ne_dif_upper_boundary))
-                print('In Ne, this operation removed {} records!'.format(n_removed_Ne))
-                print('Till now, in Ne, {} records have been removed!'.format(n_removed_Ne_total))
-
+        # print('Ne_DataFrame.shape = {}'.format(Ne_DataFrame.shape))
+        Ne_DataFrame = butterworth_filter(Ne_DataFrame, isVerbose, tag='Ne')
+        
     # ========================================= Process Te  =========================================
     if not Te_DataFrame.empty:
         # print('\nProcessing Te...')
         # Keep original data.
         Te_DataFrame0 = Te_DataFrame.copy(deep=True)
-        #print('Te_DataFrame.shape = {}'.format(Te_DataFrame.shape))
-
-        n_removed_Te_total = 0
-        # print('Remove all Te data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.
-        Te_std = Te_DataFrame.std(skipna=True, numeric_only=True)[0]
-        Te_mean = Te_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        Te_remove = (Te_DataFrame['Te']<(Te_mean-n_std*Te_std))|(Te_DataFrame['Te']>(Te_mean+n_std*Te_std))
-        Te_DataFrame['Te'][Te_remove] = np.nan
-        
-        Te_lower_boundary = Te_mean-n_std*Te_std
-        Te_upper_boundary = Te_mean+n_std*Te_std
-        
-        n_removed_Te = sum(Te_remove)
-        n_removed_Te_total += n_removed_Te
-            
-        if isVerbose:
-            print('Te_std:', Te_std)
-            print('Te_mean:', Te_mean)
-            print('The Te value range within 3.5 std is [{}, {}]'.format(Te_lower_boundary, Te_upper_boundary))
-            print('In Te, {} data has been removed!'.format(n_removed_Te))
-            print('Till now, in Te, {} records have been removed!'.format(n_removed_Te_total))
-            print('\n')
-
-        # Apply Butterworth filter to Te.
-        for Wn in [0.05, 0.45]:
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.45: print('Applying Butterworth filter with cutoff frequency = 0.45, remove spikes...')
-            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            Te_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            Te_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            if Te_DataFrame.isnull().values.sum():
-                print('Too many NaNs in Te. Skip.')
-                continue            
-            # Create an empty DataFrame to store the filtered data.
-            Te_LowPass = pd.DataFrame(index = Te_DataFrame.index, columns = ['Te'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                Te_LowPass['Te'] = sp.signal.filtfilt(B, A, Te_DataFrame['Te'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                Te_LowPass['Te'] = Te_DataFrame['Te'].copy()
-            # Calculate the difference between Tp_LowPass and Tp_DataFrame.
-            Te_dif = pd.DataFrame(index = Te_DataFrame.index, columns = ['Te']) # Generate empty DataFrame.
-            Te_dif['Te'] = Te_DataFrame['Te'] - Te_LowPass['Te']
-            # Calculate the mean and standard deviation of Te_dif. Te_dif_std is a Series object, so [0] is added.
-            Te_dif_std = Te_dif.std(skipna=True, numeric_only=True)[0]
-            Te_dif_mean = Te_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%.
-            Te_remove = (Te_dif['Te']<(Te_dif_mean-n_dif_std*Te_dif_std))|(Te_dif['Te']>(Te_dif_mean+n_dif_std*Te_dif_std))
-            Te_DataFrame[Te_remove] = np.nan
-            
-            Te_dif_lower_boundary = Te_dif_mean-n_dif_std*Te_dif_std
-            Te_dif_upper_boundary = Te_dif_mean+n_dif_std*Te_dif_std
-            
-            n_removed_Te = sum(Te_remove)
-            n_removed_Te_total += n_removed_Te
-                
-            if isVerbose:
-                print('Te_dif_std:', Te_dif_std)
-                print('Te_dif_mean:', Te_dif_mean)
-                print('The Te_dif value range within 3 std is [{}, {}]'.format(Te_dif_lower_boundary, Te_dif_upper_boundary))
-                print('In Te, this operation removed {} records!'.format(n_removed_Te))
-                print('Till now, in Te, {} records have been removed!'.format(n_removed_Te_total))
-                print('\n')
-                
-            # There is no need to convert Te to Kelvin. Te from WIND is already in Kelvin.
+        # print('Te_DataFrame.shape = {}'.format(Te_DataFrame.shape))
+        Te_DataFrame = butterworth_filter(Te_DataFrame, isVerbose, tag='Te')
     
     # ========================================= Process Na   =========================================
     if not Na_DataFrame.empty:
         # print('\nProcessing Na...')
         # Keep original data.
         Na_DataFrame0 = Na_DataFrame.copy(deep=True)
-        #print('Na_DataFrame.shape = {}'.format(Na_DataFrame.shape))
-
-        # Remove all data which fall outside 4 standard deviations.
-        n_removed_Na_total = 0
-        # print('Remove all Na data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.      
-        Na_std = Na_DataFrame.std(skipna=True, numeric_only=True)[0]
-        Na_mean = Na_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        Na_remove = (Na_DataFrame['Na']<(Na_mean-n_std*Na_std))|(Na_DataFrame['Na']>(Na_mean+n_std*Na_std))
-        Na_DataFrame['Na'][Na_remove] = np.nan
-
-        Na_lower_boundary = Na_mean-n_std*Na_std
-        Na_upper_boundary = Na_mean+n_std*Na_std
-
-        n_removed_Na = sum(Na_remove)
-        n_removed_Na_total += n_removed_Na
-
-        if isVerbose:
-            print('Na_std:', Na_std)
-            print('Na_mean:', Na_mean)
-            print('The Na value range within 3.89 std is [{}, {}]'.format(Na_lower_boundary, Na_upper_boundary))
-            print('In Na, {} data has been removed!'.format(n_removed_Na))
-            print('Till now, in Na, {} records have been removed!'.format(n_removed_Na_total))
-            print('\n')
-
-        # Apply Butterworth filter to Na.
-        for Wn in [0.05, 0.7]: # Na
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.7: print('Applying Butterworth filter with cutoff frequency = 0.7, remove spikes...')
-            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            Na_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            Na_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            if Na_DataFrame.isnull().values.sum():
-                print('Too many NaNs in Na. Skip.')
-                continue
-            # Create an empty DataFrame to store the filtered data.
-            Na_LowPass = pd.DataFrame(index = Na_DataFrame.index, columns = ['Na'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                 Na_LowPass['Na'] = sp.signal.filtfilt(B, A, Na_DataFrame['Na'])
-            except: 
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                Na_LowPass['Na'] = Na_DataFrame['Na'].copy()
-            # Calculate the difference between Na_LowPass and Na_DataFrame.
-            Na_dif = pd.DataFrame(index = Na_DataFrame.index, columns = ['Na']) # Generate empty DataFrame.
-            Na_dif['Na'] = Na_DataFrame['Na'] - Na_LowPass['Na']
-            # Calculate the mean and standard deviation of Na_dif. Na_dif_std is a Series object, so [0] is added.
-            Na_dif_std = Na_dif.std(skipna=True, numeric_only=True)[0]
-            Na_dif_mean = Na_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%.
-            Na_remove = (Na_dif['Na']<(Na_dif_mean-n_dif_std*Na_dif_std))|(Na_dif['Na']>(Na_dif_mean+n_dif_std*Na_dif_std))
-            Na_DataFrame[Na_remove] = np.nan
-            
-            Na_dif_lower_boundary = Na_dif_mean-n_dif_std*Na_dif_std
-            Na_dif_upper_boundary = Na_dif_mean+n_dif_std*Na_dif_std
-            
-            n_removed_Na = sum(Na_remove)
-            n_removed_Na_total += n_removed_Na
-            
-            if isVerbose:
-                print('Na_dif_std:', Na_dif_std)
-                print('Na_dif_mean:', Na_dif_mean)
-                print('The Na_dif value range within 3 std is [{}, {}]'.format(Na_dif_lower_boundary, Na_dif_upper_boundary))
-                print('In Na, this operation removed {} records!'.format(n_removed_Na))
-                print('Till now, in Na, {} records have been removed!'.format(n_removed_Na_total))
-
+        # print('Na_DataFrame.shape = {}'.format(Na_DataFrame.shape))
+        Na_DataFrame = butterworth_filter(Na_DataFrame, isVerbose, tag='Na')
+        
     # ========================================= Process Ta  =========================================
     if not Ta_DataFrame.empty:
         # print('\nProcessing Ta...')
         # Keep original data.
         Ta_DataFrame0 = Ta_DataFrame.copy(deep=True)
-        #print('Ta_DataFrame.shape = {}'.format(Ta_DataFrame.shape)
-        n_removed_Ta_total = 0
-        # print('Remove all Ta data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.
-        Ta_std = Ta_DataFrame.std(skipna=True, numeric_only=True)[0]
-        Ta_mean = Ta_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        Ta_remove = (Ta_DataFrame['Ta']<(Ta_mean-n_std*Ta_std))|(Ta_DataFrame['Ta']>(Ta_mean+n_std*Ta_std))
-        Ta_DataFrame['Ta'][Ta_remove] = np.nan
-        
-        Ta_lower_boundary = Ta_mean-n_std*Ta_std
-        Ta_upper_boundary = Ta_mean+n_std*Ta_std
-        
-        n_removed_Ta = sum(Ta_remove)
-        n_removed_Ta_total += n_removed_Ta
-            
-        if isVerbose:
-            print('Ta_std:', Ta_std)
-            print('Ta_mean:', Ta_mean)
-            print('The Ta value range within 3.5 std is [{}, {}]'.format(Ta_lower_boundary, Ta_upper_boundary))
-            print('In Ta, {} data has been removed!'.format(n_removed_Ta))
-            print('Till now, in Ta, {} records have been removed!'.format(n_removed_Ta_total))
-            print('\n')
-
-        # Apply Buttarworth filtar to Ta.
-        for Wn in [0.05, 0.45]:
-            # if Wn==0.05: print('Applying Buttarworth filtar with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.45: print('Applying Buttarworth filtar with cutoff frequency = 0.45, remove spikes...')
-            # Nota that, sp.signal.buttar cannot handle np.nan. Fill the nan before using it.
-            Ta_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            Ta_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            if Ta_DataFrame.isnull().values.sum():
-                print('Too many NaNs. Skip.')
-                continue
-            # Creata an empty DataFrame to store the filtared data.
-            Ta_LowPass = pd.DataFrame(index = Ta_DataFrame.index, columns = ['Ta'])
-            # Design the Butarworth filtar.
-            N = 2    # Filtar order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filtar.
-            try:
-                Ta_LowPass['Ta'] = sp.signal.filtfilt(B, A, Ta_DataFrame['Ta'])
-            except:
-                print('Encountar exception, skip sp.signal.filtfilt operation!')
-                Ta_LowPass['Ta'] = Ta_DataFrame['Ta'].copy()
-            # Calculata the difference between Tp_LowPass and Tp_DataFrame.
-            Ta_dif = pd.DataFrame(index = Ta_DataFrame.index, columns = ['Ta']) # Generata empty DataFrame.
-            Ta_dif['Ta'] = Ta_DataFrame['Ta'] - Ta_LowPass['Ta']
-            # Calculata the mean and standard deviation of Ta_dif. Ta_dif_std is a Series object, so [0] is added.
-            Ta_dif_std = Ta_dif.std(skipna=True, numeric_only=True)[0]
-            Ta_dif_mean = Ta_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%.
-            Ta_remove = (Ta_dif['Ta']<(Ta_dif_mean-n_dif_std*Ta_dif_std))|(Ta_dif['Ta']>(Ta_dif_mean+n_dif_std*Ta_dif_std))
-            Ta_DataFrame[Ta_remove] = np.nan
-            
-            Ta_dif_lower_boundary = Ta_dif_mean-n_dif_std*Ta_dif_std
-            Ta_dif_upper_boundary = Ta_dif_mean+n_dif_std*Ta_dif_std
-            
-            n_removed_Ta = sum(Ta_remove)
-            n_removed_Ta_total += n_removed_Ta
-                
-            if isVerbose:
-                print('Ta_dif_std:', Ta_dif_std)
-                print('Ta_dif_mean:', Ta_dif_mean)
-                print('The Ta_dif value range within 3 std is [{}, {}]'.format(Ta_dif_lower_boundary, Ta_dif_upper_boundary))
-                print('In Ta, this operation removed {} records!'.format(n_removed_Ta))
-                print('Till now, in Ta, {} records have been removed!'.format(n_removed_Ta_total))
-                print('\n')
+        # print('Ta_DataFrame.shape = {}'.format(Ta_DataFrame.shape)
+        Ta_DataFrame = butterworth_filter(Ta_DataFrame, isVerbose, tag='Ta')
                 
     # ===================================== Process alphaRatio  =====================================
     if not alphaRatio_DataFrame.empty:
         # print('\nProcessing alphaRatio...')
         # Keep original data.
         alphaRatio_DataFrame0 = alphaRatio_DataFrame.copy(deep=True)
-        #print('alphaRatio_DataFrame.shape = {}'.format(alphaRatio_DataFrame.shape))
-
-        # Remove all data which fall outside 4 standard deviations.
-        n_removed_alphaRatio_total = 0
-        # print('Remove all alphaRatio data which fall outside 3.89 standard deviations...')
-        n_std = 3.89 # 99.99%.
-        alphaRatio_std = alphaRatio_DataFrame.std(skipna=True, numeric_only=True)[0]
-        alphaRatio_mean = alphaRatio_DataFrame.mean(skipna=True, numeric_only=True)[0]
-        alphaRatio_remove = (alphaRatio_DataFrame['alphaRatio']<(alphaRatio_mean-n_std*alphaRatio_std))|(alphaRatio_DataFrame['alphaRatio']>(alphaRatio_mean+n_std*alphaRatio_std))
-        alphaRatio_DataFrame['alphaRatio'][alphaRatio_remove] = np.nan
-
-        alphaRatio_lower_boundary = alphaRatio_mean-n_std*alphaRatio_std
-        alphaRatio_upper_boundary = alphaRatio_mean+n_std*alphaRatio_std
-
-        n_removed_alphaRatio = sum(alphaRatio_remove)
-        n_removed_alphaRatio_total += n_removed_alphaRatio
-
-        if isVerbose:
-            print('alphaRatio_std:', alphaRatio_std)
-            print('alphaRatio_mean:', alphaRatio_mean)
-            print('The alphaRatio value range within {} std is [{}, {}]'.format(n_std, alphaRatio_lower_boundary, alphaRatio_upper_boundary))
-            print('In alphaRatio, {} data has been removed!'.format(n_removed_alphaRatio))
-            print('Till now, in alphaRatio, {} records have been removed!'.format(n_removed_alphaRatio_total))
-            print('\n')
-
-        # Apply Butterworth filter to alphaRatio.
-        for Wn in [0.05, 0.7]: # alphaRatio
-            # if Wn==0.05: print('Applying Butterworth filter with cutoff frequency = 0.05, remove large outliers...')
-            # if Wn==0.7: print('Applying Butterworth filter with cutoff frequency = 0.7, remove spikes...')
-            # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            alphaRatio_DataFrame.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            alphaRatio_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-            # Create an empty DataFrame to store the filtered data.
-            alphaRatio_LowPass = pd.DataFrame(index = alphaRatio_DataFrame.index, columns = ['alphaRatio'])
-            # Design the Buterworth filter.
-            N  = 2    # Filter order
-            B, A = sp.signal.butter(N, Wn, output='ba')
-            # Apply the filter.
-            try:
-                alphaRatio_LowPass['alphaRatio'] = sp.signal.filtfilt(B, A, alphaRatio_DataFrame['alphaRatio'])
-            except:
-                print('Encounter exception, skip sp.signal.filtfilt operation!')
-                alphaRatio_LowPass['alphaRatio'] = alphaRatio_DataFrame['alphaRatio'].copy()
-            # Calculate the difference between alphaRatio_LowPass and alphaRatio_DataFrame.
-            alphaRatio_dif = pd.DataFrame(index = alphaRatio_DataFrame.index, columns = ['alphaRatio']) # Generate empty DataFrame.
-            alphaRatio_dif['alphaRatio'] = alphaRatio_DataFrame['alphaRatio'] - alphaRatio_LowPass['alphaRatio']
-            # Calculate the mean and standard deviation of alphaRatio_dif. alphaRatio_dif_std is a Series object, so [0] is added.
-            alphaRatio_dif_std = alphaRatio_dif.std(skipna=True, numeric_only=True)[0]
-            alphaRatio_dif_mean = alphaRatio_dif.mean(skipna=True, numeric_only=True)[0]
-            # Set the values fall outside n*std to np.nan.
-            n_dif_std = 3.89 # 99.99%.
-            alphaRatio_remove = (alphaRatio_dif['alphaRatio']<(alphaRatio_dif_mean-n_dif_std*alphaRatio_dif_std))|(alphaRatio_dif['alphaRatio']>(alphaRatio_dif_mean+n_dif_std*alphaRatio_dif_std))
-            alphaRatio_DataFrame[alphaRatio_remove] = np.nan
-            
-            alphaRatio_dif_lower_boundary = alphaRatio_dif_mean-n_dif_std*alphaRatio_dif_std
-            alphaRatio_dif_upper_boundary = alphaRatio_dif_mean+n_dif_std*alphaRatio_dif_std
-            
-            n_removed_alphaRatio = sum(alphaRatio_remove)
-            n_removed_alphaRatio_total += n_removed_alphaRatio
-                
-            if isVerbose:
-                print('alphaRatio_dif_std:', alphaRatio_dif_std)
-                print('alphaRatio_dif_mean:', alphaRatio_dif_mean)
-                print('The alphaRatio_dif value range within {} std is [{}, {}]'.format(n_std, alphaRatio_dif_lower_boundary, alphaRatio_dif_upper_boundary))
-                print('In alphaRatio, this operation removed {} records!'.format(n_removed_alphaRatio))
-                print('Till now, in alphaRatio, {} records have been removed!'.format(n_removed_alphaRatio_total))   
-
+        # print('alphaRatio_DataFrame.shape = {}'.format(alphaRatio_DataFrame.shape))
+        alphaRatio_DataFrame = butterworth_filter(alphaRatio_DataFrame, isVerbose, tag='alphaRatio')
+        
     if isPlotFilterProcess:
         fig_line_width = 1
         fig_ylabel_fontsize = 9
@@ -1580,92 +1124,53 @@ def preprocess_data(data_dict, data_pickle_dir, **kwargs):
     if isVerbose:
         print('\nResampling data into {} resolution...'.format(resampledt))
 
-    # Linear fit first, to make sure there is no NaN. NaN will propagate by resample.
-    # Interpolate according to timestamps. Cannot handle boundary. Do not interpolate NaN longer than 10.
-    B_OriFrame_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-    B_OriFrame_DataFrame.drop_duplicates(keep='first', inplace=True) # Drop duplicated records, keep first one.
-    # New added records will be filled with NaN.
-    B_OriFrame_DataFrame = B_OriFrame_DataFrame.resample(resampledt).mean()
-    B_OriFrame_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-    
-    B_OriFrame_DataFrame = B_OriFrame_DataFrame[(B_OriFrame_DataFrame.index>=timeStart)\
-        &(B_OriFrame_DataFrame.index<=timeEnd)]
-
+    B_OriFrame_DataFrame = process_to_resolution(B_OriFrame_DataFrame, resampledt, 
+        n_interp_limit, timeStart, timeEnd, tag='B')
+   
     if not V_OriFrame_DataFrame.empty:
-        V_OriFrame_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        V_OriFrame_DataFrame.drop_duplicates(keep='first', inplace=True)
-        V_OriFrame_DataFrame = V_OriFrame_DataFrame.resample(resampledt).mean()
-        V_OriFrame_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        V_OriFrame_DataFrame = V_OriFrame_DataFrame[(V_OriFrame_DataFrame.index>=timeStart)\
-        &(V_OriFrame_DataFrame.index<=timeEnd)]
+        V_OriFrame_DataFrame = process_to_resolution(V_OriFrame_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='V')
+
     if not Np_DataFrame.empty:
-        Np_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Np_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Np_DataFrame = Np_DataFrame.resample(resampledt).mean()
-        Np_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Np_DataFrame = Np_DataFrame[(Np_DataFrame.index>=timeStart)\
-        &(Np_DataFrame.index<=timeEnd)]
+        Np_DataFrame = process_to_resolution(Np_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='Np')
+
     if not Tp_DataFrame.empty:
-        Tp_DataFrame.interpolate(method='time', inplace=True)
-        Tp_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Tp_DataFrame = Tp_DataFrame.resample(resampledt).mean()
-        Tp_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Tp_DataFrame = Tp_DataFrame[(Tp_DataFrame.index>=timeStart)\
-        &(Tp_DataFrame.index<=timeEnd)]   
+        Tp_DataFrame = process_to_resolution(Tp_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='Tp')
+  
     if not RD_DataFrame.empty:
         # Spacecraft data is interpolated without limit
         # Some datasets only have 1 hour data
-        RD_DataFrame.interpolate(method='time', inplace=True)
-        RD_DataFrame.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
-        RD_DataFrame = RD_DataFrame.resample(resampledt).mean()
-        RD_DataFrame.interpolate(method='time', inplace=True, limit=None)
-        RD_DataFrame = RD_DataFrame[(RD_DataFrame.index>=timeStart)\
-        &(RD_DataFrame.index<=timeEnd)]
+        RD_DataFrame = process_to_resolution(RD_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='RD')
+
     if not Ne_DataFrame.empty:
-        Ne_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Ne_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Ne_DataFrame = Ne_DataFrame.resample(resampledt).mean()
-        Ne_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Ne_DataFrame = Ne_DataFrame[(Ne_DataFrame.index>=timeStart)\
-        &(Ne_DataFrame.index<=timeEnd)]
+        Ne_DataFrame = process_to_resolution(Ne_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='Ne')
+
     if not Te_DataFrame.empty:
-        Te_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Te_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Te_DataFrame = Te_DataFrame.resample(resampledt).mean()
-        Te_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Te_DataFrame = Te_DataFrame[(Te_DataFrame.index>=timeStart)\
-        &(Te_DataFrame.index<=timeEnd)]
+        Te_DataFrame = process_to_resolution(Te_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='Te')
+
     if not Na_DataFrame.empty:
-        Na_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Na_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Na_DataFrame = Na_DataFrame.resample(resampledt).mean() 
-        Na_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Na_DataFrame = Na_DataFrame[(Na_DataFrame.index>=timeStart)\
-        &(Na_DataFrame.index<=timeEnd)]
+        Na_DataFrame = process_to_resolution(Na_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='Na')
+
     if not Ta_DataFrame.empty:
-        Ta_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Ta_DataFrame.drop_duplicates(keep='first', inplace=True)
-        Ta_DataFrame = Ta_DataFrame.resample(resampledt).mean()
-        Ta_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        Ta_DataFrame = Ta_DataFrame[(Ta_DataFrame.index>=timeStart)\
-        &(Ta_DataFrame.index<=timeEnd)]
+        Ta_DataFrame = process_to_resolution(Ta_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='Ta')
+
     if not alphaRatio_DataFrame.empty:
-        alphaRatio_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        alphaRatio_DataFrame.drop_duplicates(keep='first', inplace=True)
-        alphaRatio_DataFrame = alphaRatio_DataFrame.resample(resampledt).mean()
-        alphaRatio_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        alphaRatio_DataFrame = alphaRatio_DataFrame[(alphaRatio_DataFrame.index>=timeStart)\
-        &(alphaRatio_DataFrame.index<=timeEnd)]
+        alphaRatio_DataFrame = process_to_resolution(alphaRatio_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='alphaRatio')
+
     elif not Na_DataFrame.empty:
         NaNp = Na_DataFrame['Na']/Np_DataFrame['Np']
         alphaRatio_DataFrame = pd.DataFrame(NaNp,columns=['alphaRatio'],dtype=float)
     if data_dict['ID'] == 'PSP': 
-        V_OriFrame_noVsc_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        V_OriFrame_noVsc_DataFrame.drop_duplicates(keep='first', inplace=True)
-        V_OriFrame_noVsc_DataFrame = V_OriFrame_noVsc_DataFrame.resample(resampledt).mean()
-        V_OriFrame_noVsc_DataFrame.interpolate(method='time', inplace=True, limit=n_interp_limit)
-        V_OriFrame_noVsc_DataFrame = V_OriFrame_noVsc_DataFrame[(V_OriFrame_noVsc_DataFrame.index>=timeStart)\
-        &(V_OriFrame_noVsc_DataFrame.index<=timeEnd)]
+        V_OriFrame_noVsc_DataFrame = process_to_resolution(V_OriFrame_noVsc_DataFrame, resampledt, 
+            n_interp_limit, timeStart, timeEnd, tag='V_OriFrame')
 
     # Merge all DataFrames into one according to time index.
     if data_dict['ID']=='ACE' or 'WIND':
