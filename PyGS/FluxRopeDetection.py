@@ -1164,10 +1164,10 @@ def preprocess_data(data_dict, data_pickle_dir, **kwargs):
     if not alphaRatio_DataFrame.empty:
         alphaRatio_DataFrame = process_to_resolution(alphaRatio_DataFrame, resampledt, 
             n_interp_limit, timeStart, timeEnd, tag='alphaRatio')
-
     elif not Na_DataFrame.empty:
         NaNp = Na_DataFrame['Na']/Np_DataFrame['Np']
         alphaRatio_DataFrame = pd.DataFrame(NaNp,columns=['alphaRatio'],dtype=float)
+        
     if data_dict['ID'] == 'PSP': 
         V_OriFrame_noVsc_DataFrame = process_to_resolution(V_OriFrame_noVsc_DataFrame, resampledt, 
             n_interp_limit, timeStart, timeEnd, tag='V_OriFrame')
