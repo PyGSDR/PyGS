@@ -290,6 +290,8 @@ def findVHT(GS_DataFrame, **kwargs):
     Vsw_DataFrame = GS_DataFrame.iloc[:,3:6].astype(float)
 
     # fill nan for reconstruction
+    Vsw_DataFrame.fillna(method='ffill', inplace=True)
+    Vsw_DataFrame.fillna(method='bfill', inplace=True)
     if 'Np' in GS_DataFrame.keys():
         Np_DataFrame = GS_DataFrame.loc[:,['Np']].astype(float)
         Np_DataFrame.fillna(method='ffill', inplace=True)
