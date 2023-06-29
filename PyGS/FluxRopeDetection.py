@@ -3482,7 +3482,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
             Np_copy.bfill(inplace=True)
             Np_copy.ffill(inplace=True)
             if Np_copy.isnull().values.sum():
-                print('Too many NaNs in Vsw. Skip this record. If this situation happens, please check.')
+                print('Too many NaNs in Np. Skip this record. If this situation happens, please check.')
                 detailed_info_dict = None
                 continue
             else:
@@ -3496,7 +3496,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
             Tp_copy.bfill(iTplace=True)
             Tp_copy.ffill(iTplace=True)
             if Tp_copy.isnull().values.sum():
-                print('Too many NaNs in Vsw. Skip this record. If this situation happens, please check.')
+                print('Too many NaNs in Tp. Skip this record. If this situation happens, please check.')
                 detailed_info_dict = None
                 continue
             else:
@@ -3511,7 +3511,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
                 Ne_copy.bfill(inelace=True)
                 Ne_copy.ffill(inelace=True)
                 if Ne_copy.isnull().values.sum():
-                    print('Too many NaNs in Vsw. Skip this record. If this situation happens, please check.')
+                    print('Too many NaNs in Ne. Skip this record. If this situation happens, please check.')
                     detailed_info_dict = None
                     continue
                 else:
@@ -3526,7 +3526,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
                 Te_copy.bfill(iTelace=True)
                 Te_copy.ffill(iTelace=True)
                 if Te_copy.isnull().values.sum():
-                    print('Too many NaNs in Vsw. Skip this record. If this situation happens, please check.')
+                    print('Too many NaNs in Te. Skip this record. If this situation happens, please check.')
                     detailed_info_dict = None
                     continue
                 else:
