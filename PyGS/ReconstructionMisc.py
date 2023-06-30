@@ -288,10 +288,11 @@ def findVHT(GS_DataFrame, **kwargs):
     # Read the magnetic field and plasma parameters
     B_DataFrame = GS_DataFrame.iloc[:,0:3].astype(float)
     Vsw_DataFrame = GS_DataFrame.iloc[:,3:6].astype(float)
-
+    
     # fill nan for reconstruction
     Vsw_DataFrame.fillna(method='ffill', inplace=True)
     Vsw_DataFrame.fillna(method='bfill', inplace=True)
+    
     if 'Np' in GS_DataFrame.keys():
         Np_DataFrame = GS_DataFrame.loc[:,['Np']].astype(float)
         Np_DataFrame.fillna(method='ffill', inplace=True)
@@ -1784,11 +1785,11 @@ def reconstruction(yourPath, **kwargs):
         # Find the axis from optcloud or obtainAxis
         print("\n---------------------------------------------")
         print("\nGetting flux rope axis...")
-        if pressureSwitch == 0:
+        if ((pressureSwitch == 0) & (get_Ab == 0)):
             z_optcloud = obtainAxis.findZaxis(rootDir,startTime,endTime,
                 alldata,polyOrder,adjustInterval=adjustInterval,
                 det2rec=detection2Reconstruction)
-        elif pressureSwitch == 1:
+        elif ((pressureSwitch == 0) & (get_Ab != 0)) or ((pressureSwitch == 1) & (get_Ab != 0)):
             # Only find the axis when pressureSwitch = 0.
             # When it is 1, load saved zs file.
             if os.path.isfile(rootDir + 'zs_select.txt'):
@@ -1799,7 +1800,7 @@ def reconstruction(yourPath, **kwargs):
             else:
                 print("\nLoading axis file zs_select.txt from",rootDir)
                 print("Error! No file was found.")
-                print("Please set pressureSwitch = 0 to obtain the axis.")
+                print("Please set pressureSwitch = 0 & get_Ab = 0 to obtain the axis.")
                 exit()
         # Calculate nesscessary parameters from clouddata
         Pt, VA_mean, V_rmn_FR, \

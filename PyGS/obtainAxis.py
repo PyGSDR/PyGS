@@ -200,6 +200,7 @@ def spilt_PtA(A_prime, A_extreme, A_turn_index, i1, i2, Bz_inFR):
     Return four arrays."""
     
     # Pt has the full expression to find the optimal axis with Pt versus A
+    # Notice Ppe here is (Pe + Pp)*(1 - AlphaMach), already with the prime sign.
     Pt = ((1-AlphaMach)**2)*np.array(Bz_inFR)**2/(2*miu) \
     + pressureSwitch*np.array(Ppe) + pressureSwitch*AlphaMach*(1-AlphaMach)*PBB
     # Find A' with a finer grid
@@ -456,7 +457,7 @@ def findZaxis(rootDir, timeStart, timeEnd, alldata, polyOrder, **kwargs):
     ############## (1) Get data segament ##############
     ############## (2) Determine VHT ##################
     ###################################################
-    # Ppe = Pp + Pp; PBB = the magnetic pressure
+    # Ppe = (Pe + Pp)*(1 - AlphaMach); PBB = the magnetic pressure
     global dt, AlphaMach, Ppe, PBB
     B, Ppe_temp, PBB_temp, dt_temp, VHT_kms, \
     AlphaMach = ReconstructionMisc.clouddata(timeStart, timeEnd, 
