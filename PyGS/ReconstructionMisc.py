@@ -1789,8 +1789,8 @@ def reconstruction(yourPath, **kwargs):
             z_optcloud = obtainAxis.findZaxis(rootDir,startTime,endTime,
                 alldata,polyOrder,adjustInterval=adjustInterval,
                 det2rec=detection2Reconstruction)
-        elif ((pressureSwitch == 0) & (get_Ab != 0)) or ((pressureSwitch == 1) & (get_Ab != 0)):
-            # Only find the axis when pressureSwitch = 0.
+        elif ((pressureSwitch == 0) & (get_Ab != 0)) or (pressureSwitch == 1):
+            # Only find the axis when pressureSwitch = 0 & get_Ab = 0.
             # When it is 1, load saved zs file.
             if os.path.isfile(rootDir + 'zs_select.txt'):
                 print("\nLoading axis file zs_select.txt from",rootDir)
