@@ -32,7 +32,6 @@ For non-Python users*:
 # On your terminal:
 tar -zxvf PyGS-0.0.1.tar.gz
 cd PyGS-0.0.1
-python3 setup.py build
 python3 setup.py install
 
 # Launch Python3 to see if it works
