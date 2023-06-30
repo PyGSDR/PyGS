@@ -7,7 +7,7 @@ I. The full expression of the GSR main function:
   reconstruction(rootDir, spacecraftID='WIND', 
                  FR_list=SFR_detection_list, eventNo=0,
                  timeStart=datetime(2018,8,28,0,24,0), timeEnd=datetime(2018,8,28,0,32,0), 
-                 adjustAxis=True, 
+                 adjustAxis=False, 
                  grid_x=15, grid_y=131, 
                  get_Ab=0, pressureSwitch=0, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                  includeTe=False, includeNe=False, saveFig=False, plotJz=False, 
