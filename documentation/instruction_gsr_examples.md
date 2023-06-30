@@ -104,6 +104,8 @@ In this section, we will introduce how to proceed the reconstruction with the de
 ### 2.2 From reconstruction 
 - Keep those lines above the main function ```reconstruction(...)```.    
 - Turn on ```adjustAxis``` in ```reconstruction(...)```.
+- Notice that this process will only be implemented with initial settings ```get_Ab = 0``` and ```pressureSwitch = 0```.
+  - If either setting is ```1```, it will automatically load the saved z-axis file. 
 - It will pop up four figures to let you decide whether this is a good axis.
 - Provide an answer on the terminal to proceed (see detailed info below).
 - Here, we would like to use timestamps of detection event No.0 while getting a new axis.
@@ -152,7 +154,8 @@ In this section, we will introduce how to proceed the reconstruction with the de
     - The rest three figures will show up and let you decide again.
     - There will be 5 trials for each run, i.e., you can answer "n" five times.
     - The temporary residue map will be saved if the 5th result is still unsatisfied.
-  - If "y", all figures will be closed automatically and Figure 1 in Section 3.1 will appear (see below).
+  - If "y", all figures will be closed automatically and the axis will be saved to your ```rootDir```.    
+    - Figure 1 in Section 3.1 will appear (see below).
     - Now, it means you are ready for getting reconstruction results.
 
 - In the meanwhile, the terminal will show information below:
@@ -235,6 +238,7 @@ reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=
 - Since we are also satisfied with the current boundary of A' and would not like to select it again, we also change ```get_Ab```.
   - ```get_Ab=1``` for right-handed flux rope (anti-clockwise rotated white arrows)
   - ```get_Ab=-1``` for left-handed flux rope (clockwise rotated white arrows)
+  - **If the axis was obtained from Section 2.2*, non-zero value of ```get_Ab``` and ```pressureSwitch = 1``` will directly load the saved axis. 
 
     Outputs:
     > Figure 1: Four pressures versus A'.    
