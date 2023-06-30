@@ -43,10 +43,12 @@ The following describes each controller/parameter inside this function:<br><br>
         - All windows will be split with increments 10/20/40 points.    
 
 - **includeTe**: include the electron temperature in the transverse pressure Pt'.    
-    - ``` includeTe=True```    
+    - ``` includeTe=True```
+    - Will remind if a spacecraft dataset does not have Te data
 
 - **includeNe**: include the electron number density in the transverse pressure Pt'.    
-    - ```includeNe=True```    
+    - ```includeNe=True```
+    - Will remind if a spacecraft dataset does not have Ne data 
  
 - **Search**: the default setting is True to search flux ropes in all search windows.    
     - ```Search=True``` 
@@ -64,7 +66,9 @@ The following describes each controller/parameter inside this function:<br><br>
     - In such a case, a detailed info pickle file will be loaded.        
 
 - **LabelFluxRope**: set to True if want to label flux rope in the final time-series plot.    
-    - ```LabelFluxRope=True```    
+    - ```LabelFluxRope=True```
+    - If would like to download and process data only:
+        - set ```Search=False, CombineRawResult=False, GetMoreInfo=False, LabelFluxRope=False```.    
 
 - **B_mag_threshold**: set a limit on the magnitude of the magnetic field (nT) to remove small fluctuations.    
     - ```B_mag_threshold=5.0```
