@@ -1164,10 +1164,10 @@ def preprocess_data(data_dict, data_pickle_dir, **kwargs):
     if not alphaRatio_DataFrame.empty:
         alphaRatio_DataFrame = process_to_resolution(alphaRatio_DataFrame, resampledt, 
             n_interp_limit, timeStart, timeEnd, tag='alphaRatio')
+
     elif not Na_DataFrame.empty:
         NaNp = Na_DataFrame['Na']/Np_DataFrame['Np']
         alphaRatio_DataFrame = pd.DataFrame(NaNp,columns=['alphaRatio'],dtype=float)
-        
     if data_dict['ID'] == 'PSP': 
         V_OriFrame_noVsc_DataFrame = process_to_resolution(V_OriFrame_noVsc_DataFrame, resampledt, 
             n_interp_limit, timeStart, timeEnd, tag='V_OriFrame')
@@ -3854,6 +3854,12 @@ def detection(rootDir,spacecraftID,timeStart,timeEnd,**kwargs):
             print('\nProcessing data...')
             data_DF_high_resltn = preprocess_data(data_dict, data_pickle_dir, 
                 MutliResolution=True, isPlotFilterProcess=True)
+
+    # If all the rest settings are False,
+    # it means download and process only.
+    if ((Search==False) & (CombineRawResult==False) &(GetMoreInfo==False) & (LabelFluxRope==False)):
+        print("\nDone.")
+        exit()
 
     # 3) Detect flux ropes.
     print('\n######################################################################')
