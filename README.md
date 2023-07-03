@@ -43,7 +43,9 @@ import PyGS
 - The Grad-Shafranov (GS)-based detection (GSD)
   - Please see [instruction_gsd](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_gsd.md) for more information.
   ```python
-  import datetime
+
+
+  from datetime import datetime
   from PyGS.FluxRopeDetection import detection
   
   rootDir = '/home/ychen/Desktop/PyGS/examples/'
@@ -65,7 +67,7 @@ import PyGS
   ```python
   import pickle
   import pandas as pd
-  import datetime
+  from datetime import datetime
   from PyGS.ReconstructionMisc import reconstruction
 
   # Please specify the path to where the "examples" folder is saved.
