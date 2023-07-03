@@ -65,6 +65,9 @@ import PyGS
 - The Grad-Shafranov (GS)-based reconstruction (GSR)
   - Please see [instruction_gsr_example](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_gsr_examples.md) for more information.
   ```python
+
+  """It is better to copy all these lines into a script file and run python3 script.py"""
+  
   import pickle
   import pandas as pd
   from datetime import datetime
