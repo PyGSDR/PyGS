@@ -15,6 +15,8 @@ I. The full expression of the GSR main function:
                  plotSpacecraftTimeSeries=False, adjustInterval=False, 
                  checkPtAFitting=False, helicityTwist=False)
   ```
+**Note: It may be better to copy all these lines into a script file and run ```python3 script.py```.*    
+
 II. This instruction will include:     
 - Initializing (lines before the main function and the first three rows in the above main function)   
 - Obtaining the flux rope axis (the 4th row)   
