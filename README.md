@@ -22,7 +22,7 @@ This package consists of two key products to serve as a set of comprehensive too
   - Final outputs: a set of figures characterizing flux rope properties
 
 ## Python & Dependencies
-Python 3 | Numpy | SciPy | pandas | Matplotlib | ai.cdas | SpacePy
+Python 3 | Numpy | SciPy | pandas | Matplotlib | ai.cdas | SpacePy | [CDF Library](https://cdf.gsfc.nasa.gov/)
 
 ## Installations
 For non-Python users*:
