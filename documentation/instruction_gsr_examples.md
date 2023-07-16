@@ -225,7 +225,7 @@ For non-Python users, remember to copy all those lines before this function when
         ```
     - Outputs:
       > Figure shows the normalized Pt'(A') and fitting curves.    
-      > Since the left and right boundaries look good. We decide to keep ```dAl0=0.0, dAr0=0.0```.     
+      > Since the left and right boundaries look good, we decide to keep ```dAl0=0.0, dAr0=0.0```.     
       > <img width="250"        src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_check_PtA.png">    
     - Can be adjusted multiple times until satisfied.
       - For **non-Python users**, you will manually close or quit all figures to rerun the above command line.
