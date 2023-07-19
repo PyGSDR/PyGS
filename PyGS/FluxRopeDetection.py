@@ -2503,6 +2503,7 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
                 plt.show()
 
         # Remove the records with |k| > 0.3 & |r| < 0.8 & MA > 0.9.
+        # In other words, for records with |k| > 0.3, we will keep those with |r| >= 0.8 & MA <= 0.9.
         # Meanwhile, keep the records with |k| < 0.3         
         eventList_DF_3_CheckWalenTest_temp_FRFF = eventList_DF_3_CheckWalenTest_temp[
         ((abs(eventList_DF_3_CheckWalenTest_temp['k']) > 0.300) & (abs(eventList_DF_3_CheckWalenTest_temp['r'])
