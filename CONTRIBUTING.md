@@ -20,5 +20,5 @@ When a bug occurs, we would appreciate if the following information are provided
 
 If you are proposing a feature:
 
-* Please let us know whether the architecture will be modified
-* Explain the functionality of this improvement
+* Please let us know whether the architecture will be modified.
+* Explain the functionality of this improvement.
