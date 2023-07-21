@@ -5,7 +5,7 @@ We welcome bug reports, feedbacks and other contributions!
 # Short version
 
 * Submit bug reports, feature requests, and feedbacks [here](https://github.com/PyGSDR/PyGS/issues).
-* Make pull requests to the ``develop`` branch
+* Make pull requests to the ``develop`` branch.
 
 # Bug reports
 
