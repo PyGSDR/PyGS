@@ -2506,12 +2506,13 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
         # In other words, for records with |k| > 0.3, we will keep those with |r| >= 0.8 & MA <= 0.9.
         # Meanwhile, keep the records with |k| < 0.3         
         eventList_DF_3_CheckWalenTest_temp_FRFF = eventList_DF_3_CheckWalenTest_temp[
-        ((abs(eventList_DF_3_CheckWalenTest_temp['k']) > 0.300) & (abs(eventList_DF_3_CheckWalenTest_temp['r'])
-         >= walenTest_r_threshold) & (eventList_DF_3_CheckWalenTest_temp['MA'] <= 0.900))]
+        ((abs(eventList_DF_3_CheckWalenTest_temp['k']) > 0.300) & (abs(eventList_DF_3_CheckWalenTest_temp['k']) < walenTest_k_threshold)
+         & (abs(eventList_DF_3_CheckWalenTest_temp['r']) >= walenTest_r_threshold) 
+         & (eventList_DF_3_CheckWalenTest_temp['MA'] <= 0.900))]
         # eventList_DF_3_CheckWalenTest_temp = eventList_DF_3_CheckWalenTest_temp[
         # (abs(eventList_DF_3_CheckWalenTest_temp['k']) < 0.300)].append(eventList_DF_3_CheckWalenTest_temp_FRFF, ignore_index=True)
         eventList_DF_3_CheckWalenTest_temp = pd.concat([eventList_DF_3_CheckWalenTest_temp[
-            (abs(eventList_DF_3_CheckWalenTest_temp['k']) < 0.300)],eventList_DF_3_CheckWalenTest_temp_FRFF], axis=0)
+            (abs(eventList_DF_3_CheckWalenTest_temp['k']) <= 0.300)],eventList_DF_3_CheckWalenTest_temp_FRFF], axis=0)
         # Drop 'r','k', 'MA', and 'topTurn'.
         eventList_DF_3_CheckWalenTest_temp = eventList_DF_3_CheckWalenTest_temp.drop(['r','k','MA','topTurn'], axis=1)
         eventList_DF_3_CheckWalenTest_temp = eventList_DF_3_CheckWalenTest_temp.sort_values(by='startTime')
