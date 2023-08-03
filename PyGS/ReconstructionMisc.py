@@ -1652,8 +1652,8 @@ def reconstruction(yourPath, **kwargs):
     uni_grid, polyOrder, nx, ny, dmid, get_Ab, dAl0, dAr0, pressureSwitch = 1,3,15,131,0,0,0,0,0
     # Personalized settings
     if 'polyOrder' in kwargs: polyOrder = kwargs['polyOrder']
-    if 'nx' in kwargs: nx = kwargs['nx']
-    if 'ny' in kwargs: ny = kwargs['ny']
+    if 'grid_x' in kwargs: nx = kwargs['grid_x']
+    if 'grid_y' in kwargs: ny = kwargs['grid_y']
     if 'dmid' in kwargs: dmid = kwargs['dmid']
     if 'get_Ab' in kwargs: 
         get_Ab = kwargs['get_Ab']
