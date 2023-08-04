@@ -14,7 +14,7 @@ This package consists of two key products to serve as a set of comprehensive too
     - an event list including selected flux rope parameters
     - a time-series plot showing flux rope intervals and selected plots showing part of the analysis results
 
-- The Grad-Shafranov (GS) type reconstruction (GSR, [Hu & Sonnuerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293)):
+- The Grad-Shafranov (GS) type reconstruction (GSR, [Hu & Sonnerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293)):
   - Visualize and characterize the 2D magnetic field configuration from 1D time-series data
   - Confirm the SFR detection results
   - Derive flux rope parameters, e.g., the poloidal and toroidal magnetic fluxes, the relative helicity, average twist, etc.
@@ -101,7 +101,7 @@ import PyGS
 
 ## Citations and References
 - If using GSD, please cite [Hu et al. 2018](https://doi.org/10.3847/1538-4365/aae57d) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).    
-- If using GSR, please cite [Hu & Sonnuerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).
+- If using GSR, please cite [Hu & Sonnerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).
 - Flux rope events using the original GSD are available on [flux rope database](http://www.fluxrope.info).
 - Python files for the original GSD are available on [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection).
 
