@@ -100,8 +100,8 @@ import PyGS
   - For MVAB frame, please see [instruction_mvab](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_mvab.md).
 
 ## Citations and References
-- If using GSD, please cite [Hu et al. 2018](https://doi.org/10.3847/1538-4365/aae57d) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).    
-- If using GSR, please cite [Hu & Sonnerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).
+- If using GSD, please cite [Zheng and Hu 2018](https://doi.org/10.3847/2041-8213/aaa3d7), [Hu et al. 2018](https://doi.org/10.3847/1538-4365/aae57d) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).    
+- If using GSR, please cite [Sonnerup & Guo](https://doi.org/10.1029/96GL03573), [Hau & Sonnerup 1999](https://doi.org/10.1029/1999JA900002), [Hu & Sonnerup 2002](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2001JA000293) & [Chen and Hu 2022](https://doi.org/10.3847/1538-4357/ac3487).
 - Flux rope events using the original GSD are available on [flux rope database](http://www.fluxrope.info).
 - Python files for the original GSD are available on [Dr. Jinlei Zheng's GitHub](https://github.com/AlexJinlei/Magnetic_Flux_Rope_Detection).
 
