@@ -102,6 +102,7 @@ In this section, we will introduce how to proceed the reconstruction with the de
   - Since we use the detection result, the flux rope axis will be extracted automatically as well.
   - Actually, the reconstruction is already started by copying the code block in Section 1.
 - If specifying timestamps manually in the last step, go to Section 2.2 to obtain a new axis.
+- If would like to adjust detection z-axis, also turn on ```adjustAxis``` and go to Section 2.2.
 
 ### 2.2 From reconstruction 
 - Keep those lines above the main function ```reconstruction(...)```.    
