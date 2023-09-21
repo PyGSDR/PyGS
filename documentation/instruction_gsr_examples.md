@@ -204,7 +204,7 @@ For non-Python users, remember to copy all those lines before this function when
     - Outputs:    
       > **Figure 1**: Four parameters (Pt', Bz', Ppe', and PBz') versus A'.    
       > Initially, there is no cyan vertical dashed line on the second panel.
-      > Users need to select it by manually clicking the cross point of two curves, i.e., the boundary of A'.
+      > Users need to select it by manually clicking the outermost cross point of two curves, i.e., the boundary of A'.
       > Take the second panel as the main reference.
       > If it does not have a cross point, try the first panel.
       > The reconstruction is then processed and Figures 2 & 3 will pop up.    
