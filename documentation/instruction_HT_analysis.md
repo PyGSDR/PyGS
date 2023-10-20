@@ -34,7 +34,7 @@ On your terminal:
 > VHT is = [-360.61966463   -6.51443291    1.5279859]
 
 Figure: Comparison between -VHT x B and -VHT(t) x B    
-<img width="400" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_checkHT.png">
+<img width="400" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_checkHT.png">
 
 
 ## 2. Building the HT frame with a given axial direction
