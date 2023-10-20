@@ -80,7 +80,7 @@ The following describes each controller/parameter inside this function:<br><br>
 
 ## Example of Detection results
 - Flux rope event list
-<img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/detection_FR_event_list.png">
+<img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/detection_FR_event_list.png">
 
 - Flux rope time-series plot
-<img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/detection_FR_time_series.png">
+<img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/detection_FR_time_series.png">
