@@ -32,4 +32,4 @@ On your terminal:
 > 
 > Figure: Hodograms of the magnetic field.      
 > **Subscripts 1, 2, and 3 correspond to the maximum, intermediate, and minimum variance in the magnetic field.*   
-> <img width="600" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_hodogram.png">
+> <img width="600" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_hodogram.png">
