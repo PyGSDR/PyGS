@@ -139,17 +139,17 @@ In this section, we will introduce how to proceed the reconstruction with the de
     > The next three figures pop up, and with them, users will determine whether this is a good axis.    
     > The right Figure shows two branches of Pt'(A') in different directions (see legends).    
     > **If it appears blank, it means the current selection is not acceptable. Try a different one.*    
-    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_residue_map.png">
-    > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_multi_directions.png">
+    > <img width="300" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/axis_residue_map.png">
+    > <img width="300" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/axis_multi_directions.png">
   - Parameters along the spacecraft path: A', B in flux rope frame, pressures, and plasma beta.
     > Figure shows several parameters along the spacecraft path with the selected axial direction.    
     > For a flux rope structure, A' has one and only one extremum, and B_inFR has one or more rotating components.    
-    > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_parameters_alongsc.png">
+    > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/axis_parameters_alongsc.png">
   - Four pressures versus A'.
     > Panels show Pt'(A'), Bz'(A'), p'(A'), and PBz'(A').    
     > For a flux rope, it must have a good double-folding pattern between two branches of Pt'(A').    
     > Bz'(A') curves usually also have the double-folding pattern except for those large-beta flux ropes.    
-    > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/axis_4_pressures.png">
+    > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/axis_4_pressures.png">
     
 - On the terminal, it will ask you to answer "y" or "n" to **Is the optimal invariance direction found**?
   - If "n", figures will be closed automatically except for the residue map.
@@ -208,12 +208,12 @@ For non-Python users, remember to copy all those lines before this function when
       > Take the second panel as the main reference.
       > If it does not have a cross point, try the first panel.
       > The reconstruction is then processed and Figures 2 & 3 will pop up.    
-      > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_pressures.png">   
+      > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/first_round_pressures.png">   
 
       > **Figures 2 & 3**: The reconstructed cross-sectional map & Pt' versus A'.    
       > These two figures are temporary results obtained from the GSR (not the final yet).         
-      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_cross_section.png">
-      > <img width="220" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_PtA.png">
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/first_round_cross_section.png">
+      > <img width="220" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/first_round_PtA.png">
 
   - Can also change ```dmid```, ```dAl0```, and ```dAr0``` if necessary.
     - ```dmid = 0```: set the spacecraft path at 0.
@@ -227,7 +227,7 @@ For non-Python users, remember to copy all those lines before this function when
     - Outputs:
       > Figure shows the normalized Pt'(A') and fitting curves.    
       > Since the left and right boundaries look good, we decide to keep ```dAl0=0.0, dAr0=0.0```.     
-      > <img width="250"        src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_check_PtA.png">    
+      > <img width="250"        src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/first_round_check_PtA.png">    
     - Can be adjusted multiple times until satisfied.
       - For **non-Python users**, you will manually close or quit all figures to rerun the above command line.
       - If satisfied with the current results, go to Section 4.
@@ -248,28 +248,28 @@ reconstruction(rootDir,spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=
     > Since the first round has ```pressureSwitch = 0```, the thermal pressure (3rd panel) was 0.    
     > Now, all pressures are included.
     > 
-    > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_4_pressures.png">   
+    > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_4_pressures.png">   
 
     > Figures 2 & 3: The reconstructed cross-sectional map & Pt' versus A'.    
     > These two figures are the **final** results from the GSR.    
     > Left: the black contours and color background represent the transverse Bt and the axial ﬁeld Bz.
     > The closed transverse ﬁeld-line regions and the gradient of the unipolar Bz confirm the ﬂux rope conﬁguration.
     > More info about these figures can be found in any reference papers related to the GSR technique.   
-    > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section.png">
-    > <img width="220" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_PtA.png">
+    > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_cross_section.png">
+    > <img width="220" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_PtA.png">
 
 
 - Again, check whether ```dmid```, ```dAl0```, and ```dAr0``` needs adjustments.  
   - ```dmid = -10```
     - Now, we would like to move the spacecraft path upward.
       > Comparison between before (left) and after moving (right):    
-      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section.png">
-      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png">        
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_cross_section.png">
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_cross_section_dmid.png">        
   - ```dAl0 = 0.0, dAr0 = 0.0```
     - Outputs:    
       > Figure shows the normalized curves.    
       > So, still feel good, and thus no changes.     
-      > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_check_PtA.png">
+      > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_check_PtA.png">
 
 - Since we are okay with the current results, the GSR for this event is complete by this step.
   - If unsatisfied, re-run the main function and adjust the above parameters.
@@ -289,7 +289,7 @@ Change to True if would like to have any features.
                    get_Ab=1, pressureSwitch=1, polyOrder=3, dmid=0, dAl0=0.0, dAr0=0.0,
                    plotJz=True)
         ```
-        > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_Jz.png">    
+        > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_Jz.png">    
     
 - **plotHodogram**: plot hodograms of the magnetic field via the MVAB.
     - In ```reconstruction(...)```, add ```plotHodogram = True```.    
@@ -299,7 +299,7 @@ Change to True if would like to have any features.
                    plotHodogram=True)
         ```
         > Subscripts 1, 2, and 3 correspond to the maximum, intermediate, and minimum variance in the magnetic field.    
-        > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_hodogram.png">
+        > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_hodogram.png">
         
 - **plotWalenRelation**: plot the Walen relation between V-remaining and VA.
     - In ```reconstruction(...)```, add ```plotWalenRelation = True```.    
@@ -310,7 +310,7 @@ Change to True if would like to have any features.
         ```
         > The Walen relation between the remaining flow and Alfven velocities.    
         > Red, green, and blue circles represent components (R, T, N) or (X, Y, Z).    
-        > <img width="300" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_walen_relation.png">  
+        > <img width="300" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_walen_relation.png">  
 
 - **plotSpacecraftTimeSeries**: plot the time-series data from spacecraft.
    - In ```reconstruction(...)```, add ```plotSpacecraftTimeSeries = True```.    
@@ -320,7 +320,7 @@ Change to True if would like to have any features.
                    plotSpacecraftTimeSeries=True)
         ```
        > Time series plot from the original spacecraft dataset.    
-       > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_spacecraftTimeSeries.png">  
+       > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_spacecraftTimeSeries.png">  
         
 - **adjustInterval**: adjust the boundary of an interval, i.e., starting and/or ending times.    
     - The default setting is to show the current interval with +/- 10 points.
@@ -340,7 +340,7 @@ Change to True if would like to have any features.
        > Selected ending time     =  2018-08-24 16:58:25    
        > Adjusted starting time   =  2018-08-24 11:34:00    
        > Adjusted ending time     =  2018-08-24 16:58:00    
-       > <img width="500" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/first_round_adjustInterval.png">
+       > <img width="500" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/first_round_adjustInterval.png">
        
 - **checkPtAFitting**: as shown in the previous section.
      
@@ -355,7 +355,7 @@ Change to True if would like to have any features.
                    checkHT=True)
         ```
         > Comparison between -VHT x B and -VHT(t) x B.    
-        > <img width="250" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_checkHT.png">  
+        > <img width="250" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_checkHT.png">  
         
 - **includeTe**: include the electron temperature in the transverse pressure Pt'.
   
