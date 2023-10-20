@@ -61,7 +61,7 @@ import PyGS
           Search=True, CombineRawResult=True, GetMoreInfo=True,
           LabelFluxRope=True,B_mag_threshold=5.0, shockList_DF_path=shockList, allowIntvOverlap=False)
   ```
-  > <img width="600" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/detection_FR_time_series.png">
+  > <img width="600" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/detection_FR_time_series.png">
 - The Grad-Shafranov (GS)-based reconstruction (GSR)
   - Please see [instruction_gsr_example](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_gsr_examples.md) for more information.
   ```python
@@ -92,8 +92,8 @@ import PyGS
                  checkPtAFitting=False, helicityTwist=False)
 
   ```
-  > <img width="370" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_cross_section_dmid.png"> 
-  > <img width="325" src="https://github.com/PyGSDR/PyGS/blob/main/example_figures/second_round_PtA.png">
+  > <img width="370" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_cross_section_dmid.png"> 
+  > <img width="325" src="https://github.com/PyGSDR/PyGS/raw/main/example_figures/second_round_PtA.png">
 
 - The GSR function includes some calculations, e.g., HT frame analysis, MVAB, etc., which can be run independently.
   - For HT analysis, please see [instruction_HT_analysis](https://github.com/PyGSDR/PyGS/blob/main/documentation/instruction_HT_analysis.md).
