@@ -61,7 +61,7 @@ Initialization includes all lines before the main function ```reconstruction(...
     from PyGS.ReconstructionMisc import reconstruction
 
     rootDir = '/home/ychen/Desktop/PyGS/examples/' # specify rootDir
-    inputFileName = 'selected_events.p' # specify input file's name
+    inputFileName = 'detailed_info.p' # specify input file's name
     # load flux rope list from detection result
     SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
 
@@ -120,7 +120,7 @@ In this section, we will introduce how to proceed the reconstruction with the de
   from PyGS.ReconstructionMisc import reconstruction
 
   rootDir = '/home/ychen/Desktop/PyGS/examples/' # specify rootDir
-  inputFileName = 'selected_events.p' # specify input file's name
+  inputFileName = 'detailed_info.p' # specify input file's name
   # load flux rope list from detection result
   SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb')) 
 
