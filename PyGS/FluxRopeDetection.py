@@ -2611,7 +2611,7 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
         # This is done by checking whether (midpoint[i+1]-midpoint[i]) < 0.5*(length[i]+length[i+1]), i.e., average lengths
         # No need to check whether eventList_DF_6_SameTurnTime_temp is empty.
         # If eventList_DF_5_CheckFittingCurve_temp is not empty, eventList_DF_6_SameTurnTime_temp cannot be empty.
-        print('\nStep 7. Remove overlapping candidates and keep the one with minimum residue.')
+        print('\nStep 7. Removing overlapping candidates and keep the one with minimum residue.')
 
         eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_6_SameTurnTime_temp.copy() # Default is deep copy.
         # eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_7_AdjacentTurnTime_temp.drop(['residue_fit','theta_phi','VHT'], axis=1)
@@ -2889,7 +2889,8 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         'Z_unitVector[0]', 'Z_unitVector[1]', 'Z_unitVector[2]', 
         'walenTest_slope', 'walenTest_intercept', 'walenTest_r_value', 'MachNumAvg', 
         'walenTest_slope_b4reverse','walenTest_intercept_b4reverse', 'walenTest_r_value_b4reverse',
-        'radialDistance (AU)', '<alphaRatio>', 'Jzmax','<VA> (km/s)','crossHelicity','residueEnergy',
+        'radialDistance (AU)', '<alphaRatio>', 'Jzmax','<VA> (km/s)',
+        'crossHelicity_walen','residueEnergy_walen','crossHelicity_dv_db','residueEnergy_dv_db',
         '<|B[0]|> (nT)', '<|B[1]|> (nT)', '<|B[2]|> (nT)','<|Bx_inFR|> (nT)', '<|By_inFR|> (nT)', '<|Bz_inFR|> (nT)', 
         'B_std', 'B0_std', 'B1_std', 'B2_std', 'Bx_inFR_std', 'By_inFR_std', 'Bz_inFR_std', 
         '|B|max (nT)', '<Vsw> (km/s)', '<Beta>', '<protonBeta>', 
@@ -3100,6 +3101,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         VA_inFR_1D = np.reshape(VA_inFR, VA_inFR.size)
         V_remaining = np.array(Vsw_inFR - VHT_inFR)
         V_remaining_1D = np.reshape(V_remaining, V_remaining.size)
+        V_remaining_avg = np.array(Vsw_inFR - np.mean(Vsw_inFR, axis=0))
         # Call walen test function.
         walenTest_slope, walenTest_intercept, walenTest_r_value = walenTest(VA_inFR_1D, V_remaining_1D)
 
@@ -3216,13 +3218,28 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         else: Na_mean = None
         
         # Get Other statistical properties.
+        # Using the method of the Walen test, ie., Vsw-VHT vs VA
         Bx_inFR_VA = np.array(B_inFR[0] * 1e-9)/np.sqrt(mu0 * np.array(P_massDensity['Np'])) / 1000.0 # km/s
         By_inFR_VA = np.array(B_inFR[1] * 1e-9)/np.sqrt(mu0 * np.array(P_massDensity['Np'])) / 1000.0 # km/s
         Bz_inFR_VA = np.array(B_inFR[2] * 1e-9)/np.sqrt(mu0 * np.array(P_massDensity['Np'])) / 1000.0 # km/s
-        crossHelicity=2*(V_remaining[:,0]*Bx_inFR_VA+V_remaining[:,1]*By_inFR_VA+V_remaining[:,2]*Bz_inFR_VA).mean()\
-        /((V_remaining[:,0]**2+V_remaining[:,1]**2+V_remaining[:,2]**2).mean()+(Bx_inFR_VA**2+By_inFR_VA**2+Bz_inFR_VA**2).mean())
-        residueEnergy=((V_remaining[:,0]**2+V_remaining[:,1]**2+V_remaining[:,2]**2).mean()-(Bx_inFR_VA**2+By_inFR_VA**2+Bz_inFR_VA**2).mean())\
-        /((V_remaining[:,0]**2+V_remaining[:,1]**2+V_remaining[:,2]**2).mean()+(Bx_inFR_VA**2+By_inFR_VA**2+Bz_inFR_VA**2).mean())
+
+        dv_db_mean_walen = (V_remaining[:,0]*Bx_inFR_VA+V_remaining[:,1]*By_inFR_VA+V_remaining[:,2]*Bz_inFR_VA).mean()
+        dv_sq2_mean_walen = (V_remaining[:,0]**2+V_remaining[:,1]**2+V_remaining[:,2]**2).mean()
+        db_sq2_mean_walen = (Bx_inFR_VA**2+By_inFR_VA**2+Bz_inFR_VA**2).mean()
+        crossHelicity_walen = 2*dv_db_mean_walen/(dv_sq2_mean_walen+db_sq2_mean_walen)
+        residueEnergy_walen = (dv_sq2_mean_walen-db_sq2_mean_walen)/(dv_sq2_mean_walen+db_sq2_mean_walen)
+
+        # Calculate with the dv = V - <V> & db = VA - <VA>
+        Bx_inFR_dVA = Bx_inFR_VA - Bx_inFR_VA.mean()
+        By_inFR_dVA = By_inFR_VA - By_inFR_VA.mean()
+        Bz_inFR_dVA = Bz_inFR_VA - Bz_inFR_VA.mean()
+
+        dv_db_mean = (V_remaining_avg[:,0]*Bx_inFR_dVA+V_remaining_avg[:,1]*By_inFR_dVA+V_remaining_avg[:,2]*Bz_inFR_dVA).mean() 
+        dv_sq2_mean = (V_remaining_avg[:,0]**2+V_remaining_avg[:,1]**2+V_remaining_avg[:,2]**2).mean()
+        db_sq2_mean = (Bx_inFR_dVA**2+By_inFR_dVA**2+Bz_inFR_dVA**2).mean()
+        crossHelicity_dv_db=2*dv_db_mean/(dv_sq2_mean+db_sq2_mean)
+        residueEnergy_dv_db=(dv_sq2_mean-db_sq2_mean)/(dv_sq2_mean+db_sq2_mean)
+
         # Calculate plasma Dynamic Pressure PD.
         # Original Np is in #/cc ( cc = cubic centimeter). Multiply by 1e6 to convert cc to m^3.
         if AlphaDataExist: 
@@ -3246,7 +3263,8 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         'walenTest_slope':walenTest_slope, 'walenTest_intercept':walenTest_intercept, 'walenTest_r_value':walenTest_r_value, 'MachNumAvg':MachNumAvg, 
         'walenTest_slope_b4reverse':walenTest_slope_b4reverse, 'walenTest_intercept_b4reverse':walenTest_intercept_b4reverse, 'walenTest_r_value_b4reverse':walenTest_r_value_b4reverse,
         'radialDistance (AU)':radialDistance, '<alphaRatio>':alphaRatio_mean, 'Jzmax':Jzmax, '<VA> (km/s)':VA_mean,
-        'crossHelicity':crossHelicity, 'residueEnergy':residueEnergy,
+        'crossHelicity_walen':crossHelicity_walen, 'residueEnergy_walen':residueEnergy_walen,
+        'crossHelicity_dv_db':crossHelicity_dv_db, 'residueEnergy_dv_db':residueEnergy_dv_db,
         '<|B[0]|> (nT)':B0_abs_mean, '<|B[1]|> (nT)':B1_abs_mean, '<|B[2]|> (nT)':B2_abs_mean, 
         '<|Bx_inFR|> (nT)':Bx_inFR_abs_mean, '<|By_inFR|> (nT)':By_inFR_abs_mean, '<|Bz_inFR|> (nT)':Bz_inFR_abs_mean, 
         'B_std':B_std, 'B0_std':B0_std, 'B1_std':B1_std, 'B2_std':B2_std, 
