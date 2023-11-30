@@ -78,7 +78,7 @@ import PyGS
   # You may follow the instruction to start over with the initial settings.
 
   rootDir = '/home/ychen/Desktop/PyGS/examples/'
-  inputFileName = 'selected_event.p' # The file includes the flux rope parameters
+  inputFileName = 'detailed_info.p' # The file includes the flux rope parameters
   
   SFR_detection_list = pd.read_pickle(open(rootDir + inputFileName,'rb'))
   reconstruction(rootDir, spacecraftID='WIND', FR_list=SFR_detection_list, eventNo=0,
