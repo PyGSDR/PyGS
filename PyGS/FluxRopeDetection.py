@@ -2880,6 +2880,10 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         if 'the2ndDF' in kwargs: 
             print('Time increment dt2    = {} seconds'.format(dt_2nd))
     
+    data_DF_rolling_avg = data_DF.rolling(window='8H').mean()
+    if 'the2ndDF' in kwargs:
+        the2ndDF_rolling_avg = the2ndDF.rolling(window='8H').mean()
+        
     # Create an empty dataframe.
     eventList_DF_detailedInfo = pd.DataFrame(columns=['startTime', 'turnTime', 'endTime', 'duration (s)', 'scaleSize (AU)',
         'residue_diff', 'residue_fit', '<|B|> (nT)', 'theta_deg', 'phi_deg', 
@@ -2930,9 +2934,11 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         if duration == durationTemp:
             selectedRange_mask = (data_DF.index >= startTime) & (data_DF.index <= endTime)
             data_oneFR_DF = data_DF.iloc[selectedRange_mask]
+            data_oneFR_rolling = data_DF_rolling_avg.iloc[selectedRange_mask]
         elif duration == durationTemp2:
             selectedRange_mask = (the2ndDF.index >= startTime) & (the2ndDF.index <= endTime)
             data_oneFR_DF = the2ndDF.iloc[selectedRange_mask]
+            data_oneFR_rolling = the2ndDF_rolling_avg.iloc[selectedRange_mask]
         
         # Keys: Index([u'Bx', u'By', u'Bz', u'Vx', u'Vy', u'Vz', u'Np', u'Tp', u'Te'], dtype='object')
         # Get data slice.
@@ -3230,15 +3236,31 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         residueEnergy_walen = (dv_sq2_mean_walen-db_sq2_mean_walen)/(dv_sq2_mean_walen+db_sq2_mean_walen)
 
         # Calculate with the dv = V - <V> & db = VA - <VA>
-        Bx_inFR_dVA = Bx_inFR_VA - Bx_inFR_VA.mean()
-        By_inFR_dVA = By_inFR_VA - By_inFR_VA.mean()
-        Bz_inFR_dVA = Bz_inFR_VA - Bz_inFR_VA.mean()
+        # Calculate delta-v
+        dVx_rolling = np.array(Vsw_inOriFrame['V0']) - np.array(data_oneFR_rolling['V0'])
+        dVy_rolling = np.array(Vsw_inOriFrame['V1']) - np.array(data_oneFR_rolling['V1'])
+        dVz_rolling = np.array(Vsw_inOriFrame['V2']) - np.array(data_oneFR_rolling['V2'])
+        
+        # Calculate delta-b
+        Np_rolling = data_oneFR_rolling.loc[:,['Np']]
+        P_massDensity_rolling = Np_rolling * m_proton * 1e6 # In kg/m^3.
+        P_massDensity_rolling_array = np.array(P_massDensity_rolling)
+        P_massDensity_rolling_array = np.reshape(P_massDensity_rolling_array, (len(P_massDensity_rolling), 1))
+        
+        VA_OriFrame = np.array(B_inOriFrame * 1e-9) / np.sqrt(mu0 * P_massDensity_array) / 1000.0
+        B_rolling = data_oneFR_rolling.iloc[:,0:3]
+        VA_rolling = np.array(B_rolling * 1e-9) / np.sqrt(mu0 * P_massDensity_rolling_array) / 1000.0
+        dVAx_rolling = np.array(VA_OriFrame[:,0]) - np.array(VA_rolling[:,0])
+        dVAy_rolling = np.array(VA_OriFrame[:,1]) - np.array(VA_rolling[:,1])
+        dVAz_rolling = np.array(VA_OriFrame[:,2]) - np.array(VA_rolling[:,2])
 
-        dv_db_mean = (V_remaining_avg[:,0]*Bx_inFR_dVA+V_remaining_avg[:,1]*By_inFR_dVA+V_remaining_avg[:,2]*Bz_inFR_dVA).mean() 
-        dv_sq2_mean = (V_remaining_avg[:,0]**2+V_remaining_avg[:,1]**2+V_remaining_avg[:,2]**2).mean()
-        db_sq2_mean = (Bx_inFR_dVA**2+By_inFR_dVA**2+Bz_inFR_dVA**2).mean()
-        crossHelicity_dv_db=2*dv_db_mean/(dv_sq2_mean+db_sq2_mean)
-        residueEnergy_dv_db=(dv_sq2_mean-db_sq2_mean)/(dv_sq2_mean+db_sq2_mean)
+        # Calculate sigma-c & sigma-r
+        dv_db_mean_rolling = (dVx_rolling*dVAx_rolling+dVy_rolling*dVAy_rolling+dVz_rolling*dVAz_rolling).mean() 
+        dv_sq2_mean_rolling = (dVx_rolling**2+dVy_rolling**2+dVz_rolling**2).mean()
+        db_sq2_mean_rolling = (dVAx_rolling**2+dVAy_rolling**2+dVAz_rolling**2).mean()
+
+        crossHelicity_dv_db=2*dv_db_mean_rolling/(dv_sq2_mean_rolling+db_sq2_mean_rolling)
+        residueEnergy_dv_db=(dv_sq2_mean_rolling-db_sq2_mean_rolling)/(dv_sq2_mean_rolling+db_sq2_mean_rolling)
 
         # Calculate plasma Dynamic Pressure PD.
         # Original Np is in #/cc ( cc = cubic centimeter). Multiply by 1e6 to convert cc to m^3.
