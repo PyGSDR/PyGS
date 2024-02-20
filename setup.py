@@ -2,14 +2,14 @@ from setuptools import setup
  
 setup(
     name="PyGS", 
-    version="0.0.1", 
+    version="1.0.0", 
     author="Yu Chen, Qiang Hu, and Jinlei Zheng", 
     author_email="yc0020@uah.edu, qh0001@uah.edu", 
     description="Application of the Grad-Shafranov-based techniques",
     url="https://github.com/PyGSDR/PyGS",
     packages=['PyGS'],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Stable',
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
