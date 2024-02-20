@@ -2879,10 +2879,6 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         print('Time increment dt     = {} seconds'.format(dt))
         if 'the2ndDF' in kwargs: 
             print('Time increment dt2    = {} seconds'.format(dt_2nd))
-    
-    data_DF_rolling_avg = data_DF.rolling(window='8H').mean()
-    if 'the2ndDF' in kwargs:
-        the2ndDF_rolling_avg = the2ndDF.rolling(window='8H').mean()
         
     # Create an empty dataframe.
     eventList_DF_detailedInfo = pd.DataFrame(columns=['startTime', 'turnTime', 'endTime', 'duration (s)', 'scaleSize (AU)',
@@ -2894,7 +2890,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         'walenTest_slope', 'walenTest_intercept', 'walenTest_r_value', 'MachNumAvg', 
         'walenTest_slope_b4reverse','walenTest_intercept_b4reverse', 'walenTest_r_value_b4reverse',
         'radialDistance (AU)', '<alphaRatio>', 'Jzmax','<VA> (km/s)',
-        'crossHelicity_walen','residueEnergy_walen','crossHelicity_dv_db','residueEnergy_dv_db',
+        'crossHelicity_walen','residueEnergy_walen',
         '<|B[0]|> (nT)', '<|B[1]|> (nT)', '<|B[2]|> (nT)','<|Bx_inFR|> (nT)', '<|By_inFR|> (nT)', '<|Bz_inFR|> (nT)', 
         'B_std', 'B0_std', 'B1_std', 'B2_std', 'Bx_inFR_std', 'By_inFR_std', 'Bz_inFR_std', 
         '|B|max (nT)', '<Vsw> (km/s)', '<Beta>', '<protonBeta>', 
@@ -3225,6 +3221,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         
         # Get Other statistical properties.
         # Using the method of the Walen test, ie., Vsw-VHT vs VA
+        # Caution: this is different from the definition in the turbuluence community.
         Bx_inFR_VA = np.array(B_inFR[0] * 1e-9)/np.sqrt(mu0 * np.array(P_massDensity['Np'])) / 1000.0 # km/s
         By_inFR_VA = np.array(B_inFR[1] * 1e-9)/np.sqrt(mu0 * np.array(P_massDensity['Np'])) / 1000.0 # km/s
         Bz_inFR_VA = np.array(B_inFR[2] * 1e-9)/np.sqrt(mu0 * np.array(P_massDensity['Np'])) / 1000.0 # km/s
@@ -3234,33 +3231,6 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         db_sq2_mean_walen = (Bx_inFR_VA**2+By_inFR_VA**2+Bz_inFR_VA**2).mean()
         crossHelicity_walen = 2*dv_db_mean_walen/(dv_sq2_mean_walen+db_sq2_mean_walen)
         residueEnergy_walen = (dv_sq2_mean_walen-db_sq2_mean_walen)/(dv_sq2_mean_walen+db_sq2_mean_walen)
-
-        # Calculate with the dv = V - <V> & db = VA - <VA>
-        # Calculate delta-v
-        dVx_rolling = np.array(Vsw_inOriFrame['V0']) - np.array(data_oneFR_rolling['V0'])
-        dVy_rolling = np.array(Vsw_inOriFrame['V1']) - np.array(data_oneFR_rolling['V1'])
-        dVz_rolling = np.array(Vsw_inOriFrame['V2']) - np.array(data_oneFR_rolling['V2'])
-        
-        # Calculate delta-b
-        Np_rolling = data_oneFR_rolling.loc[:,['Np']]
-        P_massDensity_rolling = Np_rolling * m_proton * 1e6 # In kg/m^3.
-        P_massDensity_rolling_array = np.array(P_massDensity_rolling)
-        P_massDensity_rolling_array = np.reshape(P_massDensity_rolling_array, (len(P_massDensity_rolling), 1))
-        
-        VA_OriFrame = np.array(B_inOriFrame * 1e-9) / np.sqrt(mu0 * P_massDensity_array) / 1000.0
-        B_rolling = data_oneFR_rolling.iloc[:,0:3]
-        VA_rolling = np.array(B_rolling * 1e-9) / np.sqrt(mu0 * P_massDensity_rolling_array) / 1000.0
-        dVAx_rolling = np.array(VA_OriFrame[:,0]) - np.array(VA_rolling[:,0])
-        dVAy_rolling = np.array(VA_OriFrame[:,1]) - np.array(VA_rolling[:,1])
-        dVAz_rolling = np.array(VA_OriFrame[:,2]) - np.array(VA_rolling[:,2])
-
-        # Calculate sigma-c & sigma-r
-        dv_db_mean_rolling = (dVx_rolling*dVAx_rolling+dVy_rolling*dVAy_rolling+dVz_rolling*dVAz_rolling).mean() 
-        dv_sq2_mean_rolling = (dVx_rolling**2+dVy_rolling**2+dVz_rolling**2).mean()
-        db_sq2_mean_rolling = (dVAx_rolling**2+dVAy_rolling**2+dVAz_rolling**2).mean()
-
-        crossHelicity_dv_db=2*dv_db_mean_rolling/(dv_sq2_mean_rolling+db_sq2_mean_rolling)
-        residueEnergy_dv_db=(dv_sq2_mean_rolling-db_sq2_mean_rolling)/(dv_sq2_mean_rolling+db_sq2_mean_rolling)
 
         # Calculate plasma Dynamic Pressure PD.
         # Original Np is in #/cc ( cc = cubic centimeter). Multiply by 1e6 to convert cc to m^3.
@@ -3286,7 +3256,6 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         'walenTest_slope_b4reverse':walenTest_slope_b4reverse, 'walenTest_intercept_b4reverse':walenTest_intercept_b4reverse, 'walenTest_r_value_b4reverse':walenTest_r_value_b4reverse,
         'radialDistance (AU)':radialDistance, '<alphaRatio>':alphaRatio_mean, 'Jzmax':Jzmax, '<VA> (km/s)':VA_mean,
         'crossHelicity_walen':crossHelicity_walen, 'residueEnergy_walen':residueEnergy_walen,
-        'crossHelicity_dv_db':crossHelicity_dv_db, 'residueEnergy_dv_db':residueEnergy_dv_db,
         '<|B[0]|> (nT)':B0_abs_mean, '<|B[1]|> (nT)':B1_abs_mean, '<|B[2]|> (nT)':B2_abs_mean, 
         '<|Bx_inFR|> (nT)':Bx_inFR_abs_mean, '<|By_inFR|> (nT)':By_inFR_abs_mean, '<|Bz_inFR|> (nT)':Bz_inFR_abs_mean, 
         'B_std':B_std, 'B0_std':B0_std, 'B1_std':B1_std, 'B2_std':B2_std, 
