@@ -26,18 +26,26 @@ Python 3 | Numpy | SciPy | pandas | Matplotlib | ai.cdas | SpacePy | [CDF Librar
 
 ## Installations
 For non-Python users*:
+- Option 1
 ```shell
 # Download PyGS & find where the file is, usually in downloads folder
 # Also download "examples" folder since it includes necessary inputs for testing.
 # On your terminal:
-tar -zxvf PyGS-0.0.1.tar.gz
-cd PyGS-0.0.1
+tar -zxvf PyGS-1.0.0.tar.gz
+cd PyGS-1.0.0
 python3 setup.py install
-
 # Launch Python3 to see if it works
 import PyGS
 ```
 **Pip3 install will be available shortly.*
+
+- Option 2:
+    - Step 1: Save the **PyGS** folder.
+    - Step 2: In the local PyGS folder, create a script file containing lines as shown in the next session (within gray block).
+    - Step 3: Let's name this file ```GSD.py``` or ```GSR.py```.
+    - Step 4: Open terminal or wherever you use Python, run ```python3 GSD.py``` or ```python3 GSR.py```.
+
+
 
 ## Basic Examples
 - The Grad-Shafranov (GS)-based detection (GSD)
