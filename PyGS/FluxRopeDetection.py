@@ -2930,11 +2930,11 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         if duration == durationTemp:
             selectedRange_mask = (data_DF.index >= startTime) & (data_DF.index <= endTime)
             data_oneFR_DF = data_DF.iloc[selectedRange_mask]
-            data_oneFR_rolling = data_DF_rolling_avg.iloc[selectedRange_mask]
+            # data_oneFR_rolling = data_DF_rolling_avg.iloc[selectedRange_mask]
         elif duration == durationTemp2:
             selectedRange_mask = (the2ndDF.index >= startTime) & (the2ndDF.index <= endTime)
             data_oneFR_DF = the2ndDF.iloc[selectedRange_mask]
-            data_oneFR_rolling = the2ndDF_rolling_avg.iloc[selectedRange_mask]
+            # data_oneFR_rolling = the2ndDF_rolling_avg.iloc[selectedRange_mask]
         
         # Keys: Index([u'Bx', u'By', u'Bz', u'Vx', u'Vy', u'Vz', u'Np', u'Tp', u'Te'], dtype='object')
         # Get data slice.
