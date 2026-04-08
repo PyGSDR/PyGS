@@ -290,16 +290,16 @@ def findVHT(GS_DataFrame, **kwargs):
     Vsw_DataFrame = GS_DataFrame.iloc[:,3:6].astype(float)
     
     # fill nan for reconstruction
-    Vsw_DataFrame.fillna(method='ffill', inplace=True)
-    Vsw_DataFrame.fillna(method='bfill', inplace=True)
+    Vsw_DataFrame.ffill(inplace=True)
+    Vsw_DataFrame.bfill(inplace=True)
     
     if 'Np' in GS_DataFrame.keys():
         Np_DataFrame = GS_DataFrame.loc[:,['Np']].astype(float)
-        Np_DataFrame.fillna(method='ffill', inplace=True)
-        Np_DataFrame.fillna(method='bfill', inplace=True)
+        Np_DataFrame.ffill(inplace=True)
+        Np_DataFrame.bfill(inplace=True)
         Tp_DataFrame = GS_DataFrame.loc[:,['Tp']].astype(float)
-        Tp_DataFrame.fillna(method='ffill', inplace=True)
-        Tp_DataFrame.fillna(method='bfill', inplace=True)
+        Tp_DataFrame.ffill(inplace=True)
+        Tp_DataFrame.bfill(inplace=True)
     if 'Te' in GS_DataFrame.keys():
         Te_DataFrame = GS_DataFrame.loc[:,['Te']].astype(float)
     if 'Ne' in GS_DataFrame.keys():
@@ -611,11 +611,11 @@ def clouddata(timeStart, timeEnd, FR_DataFrame, **kwargs):
     if 'Np' in GS_DataFrame.keys():
         # fill nan for reconstruction
         Np = GS_DataFrame.loc[:,['Np']].astype(float)
-        Np.fillna(method='ffill', inplace=True)
-        Np.fillna(method='bfill', inplace=True)
+        Np.ffill(inplace=True)
+        Np.bfill(inplace=True)
         Tp = GS_DataFrame.loc[:,['Tp']].astype(float)
-        Tp.fillna(method='ffill', inplace=True)
-        Tp.fillna(method='bfill', inplace=True)
+        Tp.ffill(inplace=True)
+        Tp.bfill(inplace=True)
         Pp = np.array(Np['Np']) * 1e6 * k_Boltzmann * np.array(Tp['Tp'])
     else:
         print('\nError! No Np or Tp data.')
@@ -703,7 +703,7 @@ def clouddata(timeStart, timeEnd, FR_DataFrame, **kwargs):
     # Calculate A'
     VHT_inFR = VHT.dot(matrix_transToFR)
     ds = - VHT_inFR[0] * 1000.0 * (GS_DataFrame.index[1]-GS_DataFrame.index[0]).seconds
-    A1 = integrate.cumtrapz(-(1 - AlphaMach) * B_inFR[1], dx=ds, initial=0)
+    A1 = integrate.cumulative_trapezoid(-(1 - AlphaMach) * B_inFR[1], dx=ds, initial=0)
     ds1 = - VHT_inFR[0] * 1000.0 * dt
     Xa = np.cumsum(ds1)
     Pt_A1_polyCoef = np.polyfit(A1, Pt, polyOrder_temp)
@@ -722,9 +722,23 @@ def clouddata(timeStart, timeEnd, FR_DataFrame, **kwargs):
 
 def var_interp2(x1, y1, x2, y2, F):
     # Interpolation 2D matrix/array
-    
-    func_interp = interpolate.interp2d(x1, y1, F, kind='cubic')
-    X = func_interp(x2, y2)
+
+    x1 = np.asarray(x1)
+    y1 = np.asarray(y1)
+    x2 = np.asarray(x2)
+    y2 = np.asarray(y2)
+    F = np.asarray(F)
+
+    # interp2d(x, y, z) is most closely matched by RectBivariateSpline(y, x, z)
+    # where z has shape (len(y), len(x)).
+    spline = interpolate.RectBivariateSpline(
+        y1,
+        x1,
+        F,
+        kx=min(3, len(y1) - 1),
+        ky=min(3, len(x1) - 1)
+    )
+    X = spline(y2, x2)
     return X
 
 def var_resample(A, B, Pt, V):

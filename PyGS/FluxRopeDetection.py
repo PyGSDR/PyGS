@@ -401,8 +401,8 @@ def butterworth_filter_3(X_dataframe, isVerbose, tag):
         else:
             # print('Applying Butterworth filter with cutoff frequency = {}, remove spikes...'.format(Wn))
             # Note that, sp.signal.butter cannot handle np.nan. Fill the nan before using it.
-            X_dataframe.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-            X_dataframe.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
+            X_dataframe.ffill(inplace=True) # Fill missing data, forward copy.
+            X_dataframe.bfill(inplace=True) # Fill missing data, backward copy.
             # Create an empty DataFrame to store the filtered data.
             X_dataframe_LowPass = pd.DataFrame(index = X_dataframe.index, columns = [column_label[0], column_label[1], column_label[2]])
             # Design the Buterworth filter.
@@ -488,8 +488,8 @@ def butterworth_filter(X_dataframe, isVerbose, tag):
     n_removed_X_total = 0
     # print('Remove all X data which fall outside 3.89 standard deviations...')
     n_std = 3.89 # 99.99%.
-    X_std = X_dataframe.std(skipna=True, numeric_only=True)[0]
-    X_mean = X_dataframe.mean(skipna=True, numeric_only=True)[0]
+    X_std = X_dataframe.std(skipna=True, numeric_only=True).iloc[0]
+    X_mean = X_dataframe.mean(skipna=True, numeric_only=True).iloc[0]
     X_remove = (X_dataframe[tag]<(X_mean-n_std*X_std))|(X_dataframe[tag]>(X_mean+n_std*X_std))
     X_dataframe[tag][X_remove] = np.nan
 
@@ -510,8 +510,8 @@ def butterworth_filter(X_dataframe, isVerbose, tag):
     # Apply Butterworth filter to X.
     for Wn in wn_range: # X
         # Note that, sp.signal.butter cannot handle X.nan. Fill the nan before using it.
-        X_dataframe.fillna(method='ffill', inplace=True) # Fill missing data, forward copy.
-        X_dataframe.fillna(method='bfill', inplace=True) # Fill missing data, backward copy.
+        X_dataframe.ffill(inplace=True) # Fill missing data, forward copy.
+        X_dataframe.bfill(inplace=True) # Fill missing data, backward copy.
         # Create an empty DataFrame to store the filtered data.
         X_LowPass = pd.DataFrame(index = X_dataframe.index, columns = [tag])
         # Design the Buterworth filter.
@@ -527,8 +527,8 @@ def butterworth_filter(X_dataframe, isVerbose, tag):
         X_dif = pd.DataFrame(index = X_dataframe.index, columns = [tag]) # Generate empty DataFrame.
         X_dif[tag] = X_dataframe[tag] - X_LowPass[tag]
         # Calculate the mean and standard deviation of X_dif. X_dif_std is a Series object, so [0] is added.
-        X_dif_std = X_dif.std(skipna=True, numeric_only=True)[0]
-        X_dif_mean = X_dif.mean(skipna=True, numeric_only=True)[0]
+        X_dif_std = X_dif.std(skipna=True, numeric_only=True).iloc[0]
+        X_dif_mean = X_dif.mean(skipna=True, numeric_only=True).iloc[0]
         # Set the values fall outside n*std to X.nan.
         n_dif_std = 3.89 # 99.99%.
         X_remove = (X_dif[tag]<(X_dif_mean-n_dif_std*X_dif_std))|(X_dif[tag]>(X_dif_mean+n_dif_std*X_dif_std))
@@ -1252,7 +1252,7 @@ def findVHT(BinOrigFrame, VswinOrigFrame):
     # [-B1zB1x       -B1zB1y      B1^2-B1xB1x] 
 
     N = len(BinOrigFrame)
-    B_square = np.square(BinOrigFrame).sum(axis=1) 
+    B_square = np.square(BinOrigFrame).sum(axis=1).to_numpy()
     KN = np.zeros((N,3,3)) # np.zeros((layer, row, column)). Right most index change first.
 
     Bmatleft = np.array([[BinOrigFrame['B0'], BinOrigFrame['B1'], BinOrigFrame['B2']],
@@ -1551,7 +1551,7 @@ def getResidueForCurrentAxial(theta_deg, phi_deg, minDuration, B_DataFrame, VHT,
     ds = - VHT_inTrialframe[0] * 1000.0 * dt # Space increment along X axis. Convert km/s to m/s.
     # Don't forget to convert km/s to m/s, and convert nT to T. By = B_inTrialframe_DataFrame[1]
     # A = integrate.cumtrapz(-B_inTrialframe_DataFrame[1]*1e-9, dx=ds, initial=0)
-    A = integrate.cumtrapz(-(1 - AlphaMach) * B_inTrialframe_DataFrame[1] * 1e-9, dx=ds, initial=0)
+    A = integrate.cumulative_trapezoid(-(1 - AlphaMach) * B_inTrialframe_DataFrame[1] * 1e-9, dx=ds, initial=0)
     # Calculate Pt(x,0).
     # Pp = Np * kB * Tp
     if includeNe & includeTe:
@@ -1673,8 +1673,13 @@ def getResidueForCurrentAxial(theta_deg, phi_deg, minDuration, B_DataFrame, VHT,
     A_boundary_left = max(A_sub1_boundary_left, A_sub2_boundary_left)
     A_boundary_right = min(A_sub1_boundary_right, A_sub2_boundary_right)
 
-    Pt_vs_A_sub1_trimmed_DataFrame = Pt_vs_A_sub1_DataFrame.iloc[Pt_vs_A_sub1_DataFrame.index.get_loc(A_boundary_left,method='nearest'):Pt_vs_A_sub1_DataFrame.index.get_loc(A_boundary_right,method='nearest')+1]
-    Pt_vs_A_sub2_trimmed_DataFrame = Pt_vs_A_sub2_DataFrame.iloc[Pt_vs_A_sub2_DataFrame.index.get_loc(A_boundary_left,method='nearest'):Pt_vs_A_sub2_DataFrame.index.get_loc(A_boundary_right,method='nearest')+1]
+    sub1_left_idx = Pt_vs_A_sub1_DataFrame.index.get_indexer([A_boundary_left], method='nearest')[0]
+    sub1_right_idx = Pt_vs_A_sub1_DataFrame.index.get_indexer([A_boundary_right], method='nearest')[0]
+    sub2_left_idx = Pt_vs_A_sub2_DataFrame.index.get_indexer([A_boundary_left], method='nearest')[0]
+    sub2_right_idx = Pt_vs_A_sub2_DataFrame.index.get_indexer([A_boundary_right], method='nearest')[0]
+
+    Pt_vs_A_sub1_trimmed_DataFrame = Pt_vs_A_sub1_DataFrame.iloc[sub1_left_idx:sub1_right_idx+1]
+    Pt_vs_A_sub2_trimmed_DataFrame = Pt_vs_A_sub2_DataFrame.iloc[sub2_left_idx:sub2_right_idx+1]
 
     # Get the time range of trimmed A.
     timeStamp_start = min(Pt_vs_A_sub1_trimmed_DataFrame['timeStamp_sub1'].min(skipna=True), Pt_vs_A_sub2_trimmed_DataFrame['timeStamp_sub2'].min(skipna=True))
@@ -2417,7 +2422,7 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
             else:
                 ds = - VHT_inFR[0] * 1000.0 * dt 
 
-            A = integrate.cumtrapz(-(1 - AlphaMach) * B_inFR[1]*1e-9, dx=ds, initial=0)
+            A = integrate.cumulative_trapezoid(-(1 - AlphaMach) * B_inFR[1]*1e-9, dx=ds, initial=0)
 
             if includeNe & includeTe:
                 Ppe = np.array(Np_inOriFrame['Np']) * 1e6 * k_Boltzmann * 1e9 * np.array(Tp_inOriFrame['Tp'])\
@@ -2615,15 +2620,27 @@ def clean_up_raw_result(spacecraftID, data_DF, dataObject_or_dataPath, **kwargs)
 
         eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_6_SameTurnTime_temp.copy() # Default is deep copy.
         # eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_7_AdjacentTurnTime_temp.drop(['residue_fit','theta_phi','VHT'], axis=1)
-        eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_7_AdjacentTurnTime_temp.assign(midpoints = len(eventList_DF_7_AdjacentTurnTime_temp)*[np.nan])
+        eventList_DF_7_AdjacentTurnTime_temp['midpoints'] = pd.Series(
+            pd.NaT,
+            index=eventList_DF_7_AdjacentTurnTime_temp.index,
+            dtype='datetime64[ns]'
+        )
 
         for index, FR_record in eventList_DF_7_AdjacentTurnTime_temp.iterrows():           
             startTime, endTime = FR_record['startTime'], FR_record['endTime']
             eventList_DF_7_AdjacentTurnTime_temp.loc[index, 'midpoints'] = startTime + (endTime - startTime)*0.5
         eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_7_AdjacentTurnTime_temp.assign(midpointsdiff=eventList_DF_7_AdjacentTurnTime_temp['midpoints'].diff())
         
-        eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_7_AdjacentTurnTime_temp.assign(avg2lens = len(eventList_DF_7_AdjacentTurnTime_temp)*[np.nan])
-        eventList_DF_7_AdjacentTurnTime_temp = eventList_DF_7_AdjacentTurnTime_temp.assign(midpDiff_avgLens = len(eventList_DF_7_AdjacentTurnTime_temp)*[np.nan])
+        eventList_DF_7_AdjacentTurnTime_temp['avg2lens'] = pd.Series(
+            pd.NaT,
+            index=eventList_DF_7_AdjacentTurnTime_temp.index,
+            dtype='timedelta64[ns]'
+        )
+        eventList_DF_7_AdjacentTurnTime_temp['midpDiff_avgLens'] = pd.Series(
+            pd.NaT,
+            index=eventList_DF_7_AdjacentTurnTime_temp.index,
+            dtype='timedelta64[ns]'
+        )
         
         # Calculate the average lengths of intervals[i] & [i+1]
         index = 0
@@ -3128,7 +3145,7 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         elif duration == durationTemp2: 
             ds = - VHT_inFR[0] * 1000.0 * dt_2nd
         # Calculate A(x,0) by integrating By. A(x,0) = Integrate[-By(s,0)ds, {s, 0, x}], where ds = -Vht dot unit(X) dt.
-        A = integrate.cumtrapz(-(1 - AlphaMach) * B_inFR[1]*1e-9, dx=ds, initial=0)
+        A = integrate.cumulative_trapezoid(-(1 - AlphaMach) * B_inFR[1]*1e-9, dx=ds, initial=0)
         # Calculate Pt(x,0). Pt(x,0)=p(x,0)+Bz^2/(2mu0). By = B_inFR[2]           
         if includeNe & includeTe:
             Ppe = np.array(Np['Np']) * 1e6 * k_Boltzmann * 1e9 * np.array(Tp['Tp']) \
@@ -3174,23 +3191,23 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         B_abs_mean_Series = B_inOriFrame.abs().mean(axis=0,skipna=True,numeric_only=True)
         B_mean_Series = B_inOriFrame.mean(axis=0,skipna=True,numeric_only=True)
         B_abs_mean = round(B_abs_mean_Series['|B|'],4)
-        B0_abs_mean = round(B_abs_mean_Series[0],4)
-        B1_abs_mean = round(B_abs_mean_Series[1],4)
-        B2_abs_mean = round(B_abs_mean_Series[2],4)
+        B0_abs_mean = round(B_abs_mean_Series.iloc[0],4)
+        B1_abs_mean = round(B_abs_mean_Series.iloc[1],4)
+        B2_abs_mean = round(B_abs_mean_Series.iloc[2],4)
         B_std = round(B_std_Series['|B|'],4)
-        B0_std = round(B_std_Series[0],4)
-        B1_std = round(B_std_Series[1],4)
-        B2_std = round(B_std_Series[2],4)
+        B0_std = round(B_std_Series.iloc[0],4)
+        B1_std = round(B_std_Series.iloc[1],4)
+        B2_std = round(B_std_Series.iloc[2],4)
         
         # B_inFR.
         B_inFR_std_Series = B_inFR.std(axis=0,skipna=True,numeric_only=True)
         B_inFR_abs_mean_Series = B_inFR.abs().mean(axis=0,skipna=True,numeric_only=True)
-        Bx_inFR_abs_mean = round(B_inFR_abs_mean_Series[0],4)
-        By_inFR_abs_mean = round(B_inFR_abs_mean_Series[1],4)
-        Bz_inFR_abs_mean = round(B_inFR_abs_mean_Series[2],4)
-        Bx_inFR_std = round(B_inFR_std_Series[0],4)
-        By_inFR_std = round(B_inFR_std_Series[1],4)
-        Bz_inFR_std = round(B_inFR_std_Series[2],4)
+        Bx_inFR_abs_mean = round(B_inFR_abs_mean_Series.iloc[0],4)
+        By_inFR_abs_mean = round(B_inFR_abs_mean_Series.iloc[1],4)
+        Bz_inFR_abs_mean = round(B_inFR_abs_mean_Series.iloc[2],4)
+        Bx_inFR_std = round(B_inFR_std_Series.iloc[0],4)
+        By_inFR_std = round(B_inFR_std_Series.iloc[1],4)
+        Bz_inFR_std = round(B_inFR_std_Series.iloc[2],4)
         
         if spacecraftID == 'PSP':
             Vsw_inOriFrame_noVsc = data_oneFR_DF.loc[:,['VR_noVsc','VT_noVsc','VN_noVsc']]
@@ -3208,15 +3225,15 @@ def get_more_flux_rope_info(spacecraftID, data_DF, dataObject_or_dataPath, **kwa
         Tp_mean = round(Tp_mean, 6)
 
         # Original Np is in #/cc ( cc = cubic centimeter).
-        Np_mean = float(Np.mean(skipna=True, numeric_only=True))# In #/cc
+        Np_mean = float(Np.mean(skipna=True, numeric_only=True).iloc[0])# In #/cc
         # Calculate Te_mean. Divided by 1e6 to convert unit to 10^6K.
-        if 'Te' in data_oneFR_DF.keys(): Te_mean = float(Te.mean(skipna=True, numeric_only=True))/1e6
+        if 'Te' in data_oneFR_DF.keys(): Te_mean = float(Te.mean(skipna=True, numeric_only=True).iloc[0])/1e6
         else: Te_mean = None
-        if 'Ta' in data_oneFR_DF.keys(): Ta_mean = float(Ta.mean(skipna=True, numeric_only=True))/1e6
+        if 'Ta' in data_oneFR_DF.keys(): Ta_mean = float(Ta.mean(skipna=True, numeric_only=True).iloc[0])/1e6
         else: Ta_mean = None
-        if 'Ne' in data_oneFR_DF.keys(): Ne_mean = float(Ne.mean(skipna=True, numeric_only=True))/1e6
+        if 'Ne' in data_oneFR_DF.keys(): Ne_mean = float(Ne.mean(skipna=True, numeric_only=True).iloc[0])/1e6
         else: Ne_mean = None
-        if 'Na' in data_oneFR_DF.keys(): Na_mean = float(Na.mean(skipna=True, numeric_only=True))/1e6
+        if 'Na' in data_oneFR_DF.keys(): Na_mean = float(Na.mean(skipna=True, numeric_only=True).iloc[0])/1e6
         else: Na_mean = None
         
         # Get Other statistical properties.
@@ -3913,7 +3930,10 @@ def detection(rootDir,spacecraftID,timeStart,timeEnd,**kwargs):
     print('#################### Filter flux rope candidates #####################')
     print('######################################################################')
     if CombineRawResult:
-        shockList_DF = pd.read_pickle(open(shockList_DF_path, 'rb'))    
+        try:
+            shockList_DF = pd.read_pickle(open(shockList_DF_path, 'rb'))
+        except UnicodeDecodeError:
+            shockList_DF = pickle.load(open(shockList_DF_path, 'rb'), encoding='latin1')
         # If multiple resolution,
         # need to merge two raw result pickle files.
         # In order to avoid messing up the raw result between multiple resolutions 
